@@ -15,6 +15,16 @@ import com.eks.netagent.core.UrlUtil
  * Created by Riggs on 2020/3/1
  */
 class VolleyProcessor(context: Context) : INetProcessor {
+    override fun setHeaders(headers: HashMap<String, String>) {
+    }
+
+    override fun addHeader(key: String, value: String) {
+    }
+
+    override fun removeHeader(key: String) {
+    }
+
+
     companion object {
         var mQueue: RequestQueue? = null
     }

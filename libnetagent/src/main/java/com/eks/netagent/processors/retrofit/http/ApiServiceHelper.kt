@@ -3,6 +3,7 @@ package com.eks.netagent.processors.retrofit.http
 import com.eks.netagent.processors.retrofit.responsebody.ProgressResponseBody
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.Request
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
@@ -15,8 +16,8 @@ import java.util.concurrent.TimeUnit
 object ApiServiceHelper {
     fun getApiService(
             baseUrl: String,
-            headerInterceptor: Interceptor? = null
-            , progressListener: ProgressResponseBody.ProgressListener? = null
+//            headerInterceptor: Interceptor? = null,
+            progressListener: ProgressResponseBody.ProgressListener? = null
     ): IApiService {
         val httpLoggingInterceptor = HttpLoggingInterceptor()
         httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
@@ -27,7 +28,8 @@ object ApiServiceHelper {
                 .writeTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(10, TimeUnit.SECONDS)
         //如果有请求头拦截器就加入
-        headerInterceptor?.let { mBuilder.addInterceptor(it) }
+//        headerInterceptor?.let { mBuilder.addInterceptor(it) }
+        mBuilder.addInterceptor(defaultHeaderInterceptor)
         //如果有下载拦截器就加入
         progressListener?.let { pL ->
             mBuilder.addNetworkInterceptor { chain ->
@@ -50,4 +52,24 @@ object ApiServiceHelper {
         serviceI = retrofit.create<IApiService>(IApiService::class.java)
         return serviceI
     }
+
+    var defaultHeaderInterceptor = Interceptor { chain ->
+
+        // 以拦截到的请求为基础创建一个新的请求对象，然后插入Header
+        var builder = chain.request().newBuilder()
+        builder = addHeaders(builder)
+        val newRequest = builder.build()
+        // 开始请求
+        chain.proceed(newRequest)
+    }
+
+    private fun addHeaders(builder: Request.Builder): Request.Builder {
+        headers.entries.forEach {
+            builder.addHeader(it.key, it.value)
+        }
+        return builder
+    }
+
+    var headers = HashMap<String, String>()
+
 }

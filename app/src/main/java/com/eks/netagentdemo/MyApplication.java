@@ -2,7 +2,7 @@ package com.eks.netagentdemo;
 
 import android.app.Application;
 
-import com.eks.netagent.core.NetProcessorImpl;
+import com.eks.netagent.core.NetAgent;
 import com.eks.netagent.processors.retrofit.RetrofitProcessor;
 
 /**
@@ -12,7 +12,7 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-//        NetProcessorImpl.INSTANCE.init(new VolleyProcessor(this));
-        NetProcessorImpl.INSTANCE.init(new RetrofitProcessor());
+//        NetAgent.INSTANCE.init(new VolleyProcessor(this));
+        NetAgent.INSTANCE.init(new RetrofitProcessor());
     }
 }

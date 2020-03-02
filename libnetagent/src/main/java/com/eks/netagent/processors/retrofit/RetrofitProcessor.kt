@@ -3,6 +3,7 @@ package com.eks.netagent.processors.retrofit
 import com.eks.netagent.core.ICallback
 import com.eks.netagent.core.INetProcessor
 import com.eks.netagent.processors.retrofit.http.ApiService
+import com.eks.netagent.processors.retrofit.http.ApiServiceHelper
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -14,6 +15,7 @@ import retrofit2.Response
  * Created by Riggs on 2020/3/2
  */
 class RetrofitProcessor : INetProcessor {
+
 
     override fun post(baseUrl: String, url: String, params: Map<String, Any>, callback: ICallback) {
         ApiService(baseUrl).iApiService.post(url, params as HashMap<String, Any>)
@@ -56,4 +58,17 @@ class RetrofitProcessor : INetProcessor {
                     }
                 })
     }
+
+    override fun setHeaders(headers: HashMap<String, String>) {
+        ApiServiceHelper.headers = headers
+    }
+
+    override fun addHeader(key: String, value: String) {
+        ApiServiceHelper.headers[key] = value
+    }
+
+    override fun removeHeader(key: String) {
+        ApiServiceHelper.headers.remove(key)
+    }
+
 }

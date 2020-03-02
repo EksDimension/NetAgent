@@ -8,4 +8,10 @@ interface INetProcessor {
     fun post(baseUrl: String, url: String, params: Map<String, Any>, callback: ICallback)
 
     fun get(baseUrl: String, url: String, params: Map<String, Any>, callback: ICallback)
+
+    fun setHeaders(headers: HashMap<String, String>)
+
+    fun addHeader(key: String, value: String)
+
+    fun removeHeader(key: String)
 }
