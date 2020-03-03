@@ -6,9 +6,9 @@ import com.android.volley.RequestQueue
 import com.android.volley.Response
 import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
+import com.eks.netagent.core.DownloadListener
 import com.eks.netagent.core.ICallback
 import com.eks.netagent.core.INetProcessor
-import com.eks.netagent.core.DownloadListener
 import com.eks.netagent.utils.UrlUtil
 
 /**
@@ -55,7 +55,7 @@ class VolleyProcessor(context: Context) : INetProcessor {
         mQueue?.add(stringRequest)
     }
 
-    override fun downloadFile(url: String, savePath: String, downloadListener: DownloadListener?) {
+    override fun downloadFile(baseUrl: String, url: String, savePath: String, downloadListener: DownloadListener?) {
     }
 
 }

@@ -61,8 +61,8 @@ class RetrofitProcessor : INetProcessor {
                 })
     }
 
-    override fun downloadFile(url: String, savePath: String, downloadListener: DownloadListener?) {
-        ApiService("https://tool.zysccn.com", downloadListener?.let {
+    override fun downloadFile(baseUrl: String, url: String, savePath: String, downloadListener: DownloadListener?) {
+        ApiService(baseUrl, downloadListener?.let {
             ProgressResponseBody.ProgressListener { totalSize, downSize ->
                 //借助rxandroid封装的
                 AndroidSchedulers.mainThread().scheduleDirect {

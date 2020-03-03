@@ -79,7 +79,7 @@ public class MainActivity extends PermissionActivity {
     }
 
     public void download(View view) {
-        String savePath = getProjectMainFolder() + "/ZykgBaseLib.zip";
+        String savePath = getProjectMainFolder() + "/a.jpg";
         DownloadListener downloadListener = new DownloadListener() {
             @Override
             public void onDownloadFailed(@NotNull String errMsg) {
@@ -102,7 +102,7 @@ public class MainActivity extends PermissionActivity {
 //                System.out.println(downSize+" "+Thread.currentThread().getName());
             }
         };
-        NetAgent.INSTANCE.downloadFile("https://static.zysccn.com/zykgsc/upload/img/ZykgBaseLib/ZykgBaseLib.zip", savePath, downloadListener);
+        NetAgent.INSTANCE.downloadFile("https://ss2.bdstatic.com/","70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=3773887467,2065790625&fm=26&gp=0.jpg", savePath, downloadListener);
     }
 
 
