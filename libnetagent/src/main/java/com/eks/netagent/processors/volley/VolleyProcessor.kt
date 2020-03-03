@@ -55,7 +55,7 @@ class VolleyProcessor(context: Context) : INetProcessor {
         mQueue?.add(stringRequest)
     }
 
-    override fun downloadFile(baseUrl: String, url: String, savePath: String, downloadListener: DownloadListener?) {
+    override fun downloadFile(url: String, savePath: String, downloadListener: DownloadListener?) {
     }
 
 }

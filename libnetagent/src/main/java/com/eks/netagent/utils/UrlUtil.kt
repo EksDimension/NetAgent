@@ -38,5 +38,24 @@ class UrlUtil {
             }
 
         }
+
+        /**
+         * 分割URL为数组,第一位为baseUrl,第二位为剩余Url
+         */
+        fun splitUrl(url: String): Array<String> {
+            val baseUrlBuilder = StringBuilder()
+            var replaced = ""
+            if (url.contains("http://")) {
+                baseUrlBuilder.append("http://")
+                replaced = url.replace("http://", "")
+
+            } else if (url.contains("https://")) {
+                baseUrlBuilder.append("https://")
+                replaced = url.replace("https://", "")
+            }
+            val baseUrl = baseUrlBuilder.append(replaced.substring(0, replaced.indexOf("/"))).toString()
+            val restUrl = replaced.substring(replaced.indexOf("/"))
+            return arrayOf(baseUrl, restUrl)
+        }
     }
 }

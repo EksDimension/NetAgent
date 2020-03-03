@@ -7,6 +7,7 @@ import com.eks.netagent.processors.retrofit.http.ApiService
 import com.eks.netagent.processors.retrofit.http.ApiServiceHelper
 import com.eks.netagent.processors.retrofit.responsebody.ProgressResponseBody
 import com.eks.netagent.utils.FileUtil
+import com.eks.netagent.utils.UrlUtil
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -61,15 +62,16 @@ class RetrofitProcessor : INetProcessor {
                 })
     }
 
-    override fun downloadFile(baseUrl: String, url: String, savePath: String, downloadListener: DownloadListener?) {
-        ApiService(baseUrl, downloadListener?.let {
+    override fun downloadFile(url: String, savePath: String, downloadListener: DownloadListener?) {
+        val splitUrlArr = UrlUtil.splitUrl(url)
+        ApiService(splitUrlArr[0], downloadListener?.let {
             ProgressResponseBody.ProgressListener { totalSize, downSize ->
                 //借助rxandroid封装的
                 AndroidSchedulers.mainThread().scheduleDirect {
                     downloadListener.onProgress(totalSize, downSize)
                 }
             }
-        }).iApiService.downloadFile(url)
+        }).iApiService.downloadFile(splitUrlArr[1])
                 .map {
                     val file = FileUtil.saveFile(savePath, it)
                     file.path

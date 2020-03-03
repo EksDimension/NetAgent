@@ -102,7 +102,7 @@ public class MainActivity extends PermissionActivity {
 //                System.out.println(downSize+" "+Thread.currentThread().getName());
             }
         };
-        NetAgent.INSTANCE.downloadFile("https://ss2.bdstatic.com/","70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=3773887467,2065790625&fm=26&gp=0.jpg", savePath, downloadListener);
+        NetAgent.INSTANCE.downloadFile("https://img2.utuku.china.com/650x0/toutiao/20200303/0f7fe4fa-fc2d-4c0e-babb-b61af7b49034.jpg", savePath, downloadListener);
     }
 
 
