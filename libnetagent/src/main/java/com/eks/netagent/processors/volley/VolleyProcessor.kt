@@ -8,13 +8,15 @@ import com.android.volley.toolbox.StringRequest
 import com.android.volley.toolbox.Volley
 import com.eks.netagent.core.ICallback
 import com.eks.netagent.core.INetProcessor
-import com.eks.netagent.core.UrlUtil
+import com.eks.netagent.core.DownloadListener
+import com.eks.netagent.utils.UrlUtil
 
 /**
  * Volley请求框架的具体处理类
  * Created by Riggs on 2020/3/1
  */
 class VolleyProcessor(context: Context) : INetProcessor {
+
     override fun setHeaders(headers: HashMap<String, String>) {
     }
 
@@ -51,6 +53,9 @@ class VolleyProcessor(context: Context) : INetProcessor {
             callback.onFailed(it.message.toString())
         })
         mQueue?.add(stringRequest)
+    }
+
+    override fun downloadFile(url: String, savePath: String, downloadListener: DownloadListener?) {
     }
 
 }

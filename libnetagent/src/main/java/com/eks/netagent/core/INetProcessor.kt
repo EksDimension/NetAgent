@@ -9,6 +9,8 @@ interface INetProcessor {
 
     fun get(baseUrl: String, url: String, params: Map<String, Any>, callback: ICallback)
 
+    fun downloadFile(url: String, savePath: String, downloadListener: DownloadListener?)
+
     fun setHeaders(headers: HashMap<String, String>)
 
     fun addHeader(key: String, value: String)

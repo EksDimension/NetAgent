@@ -24,6 +24,10 @@ object NetAgent : INetProcessor {
         mINetProcessor?.get(baseUrl, url, params, callback)
     }
 
+    override fun downloadFile(url: String, savePath: String, downloadListener: DownloadListener?) {
+        mINetProcessor?.downloadFile(url, savePath, downloadListener)
+    }
+
     override fun setHeaders(headers: HashMap<String, String>) {
         mINetProcessor?.setHeaders(headers)
     }

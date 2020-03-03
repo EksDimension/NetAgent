@@ -34,9 +34,7 @@ object ApiServiceHelper {
         progressListener?.let { pL ->
             mBuilder.addNetworkInterceptor { chain ->
                 val response = chain.proceed(chain.request())
-                response.newBuilder().body(ProgressResponseBody(response.body, ProgressResponseBody.ProgressListener { totalSize, downSize ->
-                    pL.onProgress(totalSize, downSize)
-                })).build()
+                response.newBuilder().body(ProgressResponseBody(response.body, ProgressResponseBody.ProgressListener { totalSize, downSize -> pL.onProgress(totalSize, downSize) })).build()
             }
         }
         //如果没有下载拦截器 就加入日志
@@ -53,7 +51,7 @@ object ApiServiceHelper {
         return serviceI
     }
 
-    var defaultHeaderInterceptor = Interceptor { chain ->
+    private var defaultHeaderInterceptor = Interceptor { chain ->
 
         // 以拦截到的请求为基础创建一个新的请求对象，然后插入Header
         var builder = chain.request().newBuilder()

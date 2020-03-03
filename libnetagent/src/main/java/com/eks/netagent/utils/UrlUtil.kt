@@ -1,4 +1,4 @@
-package com.eks.netagent.core
+package com.eks.netagent.utils
 
 import java.io.UnsupportedEncodingException
 import java.net.URLEncoder
