@@ -12,6 +12,7 @@ import com.eks.netagent.core.NetAgent;
 import com.eks.netagent.core.NetCallbackImpl;
 
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.HashMap;
@@ -98,13 +99,33 @@ public class MainActivity extends PermissionActivity {
             public void onProgress(long totalSize, long downSize) {
 
 //                System.out.println("总大小:" + totalSize + " 已下载:" + downSize);
-                btnDownload.setText(( Double.parseDouble(String.valueOf(downSize)) / Double.parseDouble(String.valueOf(totalSize))) * 100 + "%");
+                btnDownload.setText((Double.parseDouble(String.valueOf(downSize)) / Double.parseDouble(String.valueOf(totalSize))) * 100 + "%");
 //                System.out.println(downSize+" "+Thread.currentThread().getName());
             }
         };
         NetAgent.INSTANCE.downloadFile("https://img2.utuku.china.com/650x0/toutiao/20200303/0f7fe4fa-fc2d-4c0e-babb-b61af7b49034.jpg", savePath, downloadListener);
     }
 
+    public void upload(View view) {
+        String filePath = getProjectMainFolder() + "/navicat111_premium_cs_x64.exe";
+        HashMap<String, File> uploadFileMap = new HashMap<>();
+        uploadFileMap.put("myFile", new File(filePath));
+        HashMap<String, String> params = new HashMap<>();
+        params.put("methods", "DIY");
+        params.put("paths", "ZykgBaseLib/");
+        NetAgent.INSTANCE.uploadFile(
+                "https://tool.zysccn.com"
+                , "/api/upload/unified"
+                , uploadFileMap
+                , params
+                , new NetCallbackImpl<BeanBase<BeanUploadFiles>>() {
+                    @Override
+                    public void onSucceed(@Nullable BeanBase<BeanUploadFiles> beanUploadFilesBeanBase) {
+                        System.out.println(beanUploadFilesBeanBase.getData().getPath());
+                    }
+                }
+        );
+    }
 
     /**
      * 获取项目根目录
@@ -145,4 +166,6 @@ public class MainActivity extends PermissionActivity {
         }
         return null;
     }
+
+
 }

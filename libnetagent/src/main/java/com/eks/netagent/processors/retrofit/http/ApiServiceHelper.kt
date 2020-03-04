@@ -38,7 +38,7 @@ object ApiServiceHelper {
             }
         }
         //如果没有下载拦截器 就加入日志
-        if (progressListener == null) mBuilder.addInterceptor(httpLoggingInterceptor)
+//        if (progressListener == null) mBuilder.addInterceptor(httpLoggingInterceptor)
         val retrofit: Retrofit
         val serviceI: IApiService
         retrofit = Retrofit.Builder()

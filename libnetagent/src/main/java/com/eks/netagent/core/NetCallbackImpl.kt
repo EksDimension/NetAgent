@@ -2,6 +2,7 @@ package com.eks.netagent.core
 
 import com.google.gson.Gson
 import java.lang.reflect.ParameterizedType
+import java.lang.reflect.Type
 
 /**
  * 网络请求回调接口实现类
@@ -28,7 +29,7 @@ abstract class NetCallbackImpl<Result> : ICallback {
     /**
      * 根据当前类对象进行分析,获取类信息,目的是为了得到泛型的具体对象
      */
-    private fun analysisClassInfo(resultStr: NetCallbackImpl<Result>): Class<*> {
+    private fun analysisClassInfo(resultStr: NetCallbackImpl<Result>): Type? {
         //获取Class字节码
         val resultJavaClass = resultStr.javaClass
         //getGenericSuperClass()返回一个类型对象
@@ -36,7 +37,8 @@ abstract class NetCallbackImpl<Result> : ICallback {
         val genType = resultJavaClass.genericSuperclass
         //getActualTypeArguments()获取真实参数
         val paramsArr = (genType as ParameterizedType).actualTypeArguments
-        return paramsArr[0] as Class<*>
+        return paramsArr[0]
+
     }
 
     /**
