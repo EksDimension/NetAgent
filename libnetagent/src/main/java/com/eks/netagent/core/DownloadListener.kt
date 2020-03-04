@@ -5,6 +5,4 @@ package com.eks.netagent.core
  */
 interface DownloadListener {
     fun onProgress(totalSize: Long, downSize: Long)
-    fun onDownloadSucceed(filePath: String)
-    fun onDownloadFailed(errMsg: String)
 }

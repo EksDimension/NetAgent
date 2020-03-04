@@ -23,7 +23,10 @@ abstract class NetCallbackImpl<Result> : ICallback {
         onSucceed(objResult)
     }
 
-    override fun onFailed(e: String) {
+    override fun onFailed(e: Any) {
+        when (e) {
+            is Throwable -> onFailed(e.message.toString())
+        }
     }
 
     /**
@@ -42,7 +45,12 @@ abstract class NetCallbackImpl<Result> : ICallback {
     }
 
     /**
-     * 真正返回给开发者的回调抽象方法
+     * 真正返回给开发者的回调成功抽象方法
      */
     abstract fun onSucceed(result: Result?)
+
+    /**
+     * 真正返回给开发者的回调失败抽象方法
+     */
+    abstract fun onFailed(errMsg: String)
 }

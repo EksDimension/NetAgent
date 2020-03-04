@@ -11,9 +11,9 @@ interface INetProcessor {
 
     fun get(baseUrl: String, url: String, params: Map<String, Any>, callback: ICallback)
 
-    fun downloadFile(url: String, savePath: String, downloadListener: DownloadListener?)
+    fun downloadFile(url: String, savePath: String, callback: ICallback, downloadListener: DownloadListener?)
 
-    fun uploadFile(baseUrl: String, url: String, uploadFileMap: Map<String, File>, params: Map<String, String>, callback: ICallback)
+    fun uploadFile(baseUrl: String, url: String, uploadFileMap: Map<String, File>, params: Map<String, String>, callback: ICallback, uploadListener: UploadListener?)
 
     fun setHeaders(headers: HashMap<String, String>)
 

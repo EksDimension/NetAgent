@@ -1,6 +1,7 @@
 package com.eks.netagent.processors.retrofit.http
 
 import com.eks.netagent.processors.retrofit.responsebody.ProgressResponseBody
+import io.reactivex.android.schedulers.AndroidSchedulers
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -16,7 +17,6 @@ import java.util.concurrent.TimeUnit
 object ApiServiceHelper {
     fun getApiService(
             baseUrl: String,
-//            headerInterceptor: Interceptor? = null,
             progressListener: ProgressResponseBody.ProgressListener? = null
     ): IApiService {
         val httpLoggingInterceptor = HttpLoggingInterceptor()
@@ -28,17 +28,20 @@ object ApiServiceHelper {
                 .writeTimeout(10, TimeUnit.SECONDS)
                 .readTimeout(10, TimeUnit.SECONDS)
         //如果有请求头拦截器就加入
-//        headerInterceptor?.let { mBuilder.addInterceptor(it) }
         mBuilder.addInterceptor(defaultHeaderInterceptor)
         //如果有下载拦截器就加入
         progressListener?.let { pL ->
             mBuilder.addNetworkInterceptor { chain ->
                 val response = chain.proceed(chain.request())
-                response.newBuilder().body(ProgressResponseBody(response.body, ProgressResponseBody.ProgressListener { totalSize, downSize -> pL.onProgress(totalSize, downSize) })).build()
+                response.newBuilder().body(ProgressResponseBody(response.body, ProgressResponseBody.ProgressListener { totalSize, downSize ->
+                    //借助rxandroid封装的
+                    AndroidSchedulers.mainThread().scheduleDirect {
+                        pL.onProgress(totalSize, downSize)
+                    }
+                })).build()
             }
         }
         //如果没有下载拦截器 就加入日志
-//        if (progressListener == null) mBuilder.addInterceptor(httpLoggingInterceptor)
         val retrofit: Retrofit
         val serviceI: IApiService
         retrofit = Retrofit.Builder()

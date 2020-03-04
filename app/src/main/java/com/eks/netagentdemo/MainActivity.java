@@ -10,11 +10,13 @@ import android.widget.Toast;
 import com.eks.netagent.core.DownloadListener;
 import com.eks.netagent.core.NetAgent;
 import com.eks.netagent.core.NetCallbackImpl;
+import com.eks.netagent.core.UploadListener;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.List;
 
@@ -25,12 +27,14 @@ public class MainActivity extends PermissionActivity {
             , Manifest.permission.READ_EXTERNAL_STORAGE};
 
     private Button btnDownload;
+    private Button btnUpload;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         btnDownload = findViewById(R.id.btnDownload);
+        btnUpload = findViewById(R.id.btnUpload);
         requestRuntimePermission(permissionArray, new PermissionListener() {
             @Override
             public void onGranted() {
@@ -59,6 +63,11 @@ public class MainActivity extends PermissionActivity {
         params.put("key", "66010dabd6cfc61e55c07f68606e91c2");
         NetAgent.INSTANCE.get(baseUrl, url, params, new NetCallbackImpl<BeanObdCodeQuery>() {
             @Override
+            public void onFailed(@NotNull String errMsg) {
+                Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
             public void onSucceed(BeanObdCodeQuery objResult) {
                 Toast.makeText(MainActivity.this, objResult.toString(), Toast.LENGTH_SHORT).show();
             }
@@ -73,6 +82,11 @@ public class MainActivity extends PermissionActivity {
         params.put("key", "1883b1aa57644c2b775c608520f6cb2a");
         NetAgent.INSTANCE.post(baseUrl, url, params, new NetCallbackImpl<BeanToutiao>() {
             @Override
+            public void onFailed(@NotNull String errMsg) {
+                Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
             public void onSucceed(BeanToutiao objResult) {
                 Toast.makeText(MainActivity.this, objResult.toString(), Toast.LENGTH_SHORT).show();
             }
@@ -80,34 +94,44 @@ public class MainActivity extends PermissionActivity {
     }
 
     public void download(View view) {
-        String savePath = getProjectMainFolder() + "/a.jpg";
+        String savePath = getProjectMainFolder() + "/navicat111_premium_cs_x64.exe";
         DownloadListener downloadListener = new DownloadListener() {
-            @Override
-            public void onDownloadFailed(@NotNull String errMsg) {
-//                System.out.println("下载失败:"+errMsg);
-                Toast.makeText(MainActivity.this, "下载失败:" + errMsg, Toast.LENGTH_SHORT).show();
-            }
+//            @Override
+//            public void onDownloadFailed(@NotNull String errMsg) {
+////                System.out.println("下载失败:"+errMsg);
+//                Toast.makeText(MainActivity.this, "下载失败:" + errMsg, Toast.LENGTH_SHORT).show();
+//            }
 
-            @Override
-            public void onDownloadSucceed(@NotNull String filePath) {
-//                System.out.println("下载完毕 路径:"+filePath);
-                Toast.makeText(MainActivity.this, "下载完毕 路径:" + filePath, Toast.LENGTH_SHORT).show();
-            }
+//            @Override
+//            public void onDownloadSucceed(@NotNull String filePath) {
+////                System.out.println("下载完毕 路径:"+filePath);
+//                Toast.makeText(MainActivity.this, "下载完毕 路径:" + filePath, Toast.LENGTH_SHORT).show();
+//            }
 
             @SuppressLint("SetTextI18n")
             @Override
             public void onProgress(long totalSize, long downSize) {
 
 //                System.out.println("总大小:" + totalSize + " 已下载:" + downSize);
-                btnDownload.setText((Double.parseDouble(String.valueOf(downSize)) / Double.parseDouble(String.valueOf(totalSize))) * 100 + "%");
+                btnDownload.setText(new DecimalFormat("0.00").format((Double.parseDouble(String.valueOf(downSize)) / Double.parseDouble(String.valueOf(totalSize))) * 100) + "%");
 //                System.out.println(downSize+" "+Thread.currentThread().getName());
             }
         };
-        NetAgent.INSTANCE.downloadFile("https://img2.utuku.china.com/650x0/toutiao/20200303/0f7fe4fa-fc2d-4c0e-babb-b61af7b49034.jpg", savePath, downloadListener);
+        NetAgent.INSTANCE.downloadFile("https://static.zysccn.com/zykgsc/upload/img/ZykgBaseLib/navicat111_premium_cs_x64.exe", savePath,new NetCallbackImpl<String>(){
+            @Override
+            public void onFailed(@NotNull String errMsg) {
+                Toast.makeText(MainActivity.this, "下载失败:" + errMsg, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onSucceed(@Nullable String filePath) {
+                Toast.makeText(MainActivity.this, "下载完毕 路径:" + filePath, Toast.LENGTH_SHORT).show();
+            }
+        }, downloadListener);
     }
 
     public void upload(View view) {
-        String filePath = getProjectMainFolder() + "/navicat111_premium_cs_x64.exe";
+        String filePath = getProjectMainFolder() + "/navicat111_premium_cs_x86.exe";
         HashMap<String, File> uploadFileMap = new HashMap<>();
         uploadFileMap.put("myFile", new File(filePath));
         HashMap<String, String> params = new HashMap<>();
@@ -120,8 +144,20 @@ public class MainActivity extends PermissionActivity {
                 , params
                 , new NetCallbackImpl<BeanBase<BeanUploadFiles>>() {
                     @Override
+                    public void onFailed(@NotNull String errMsg) {
+                        Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
                     public void onSucceed(@Nullable BeanBase<BeanUploadFiles> beanUploadFilesBeanBase) {
-                        System.out.println(beanUploadFilesBeanBase.getData().getPath());
+                        Toast.makeText(MainActivity.this, "上传完毕 路径:" + beanUploadFilesBeanBase.getData().getPath(), Toast.LENGTH_SHORT).show();
+                    }
+                }
+                , new UploadListener() {
+                    @SuppressLint("SetTextI18n")
+                    @Override
+                    public void onProgress(long totalSize, long uploadedSize) {
+                        btnUpload.setText(new DecimalFormat("0.00").format((Double.parseDouble(String.valueOf(uploadedSize)) / Double.parseDouble(String.valueOf(totalSize))) * 100) + "%");
                     }
                 }
         );

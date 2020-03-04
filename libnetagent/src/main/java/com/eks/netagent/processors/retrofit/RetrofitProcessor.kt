@@ -3,8 +3,10 @@ package com.eks.netagent.processors.retrofit
 import com.eks.netagent.core.DownloadListener
 import com.eks.netagent.core.ICallback
 import com.eks.netagent.core.INetProcessor
+import com.eks.netagent.core.UploadListener
 import com.eks.netagent.processors.retrofit.http.ApiService
 import com.eks.netagent.processors.retrofit.http.ApiServiceHelper
+import com.eks.netagent.processors.retrofit.responsebody.DownloadProgressRequestBody
 import com.eks.netagent.processors.retrofit.responsebody.ProgressResponseBody
 import com.eks.netagent.utils.FileUtil
 import com.eks.netagent.utils.UrlUtil
@@ -12,9 +14,7 @@ import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
-import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
-import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.ResponseBody
 import retrofit2.Response
 import java.io.File
@@ -40,7 +40,7 @@ class RetrofitProcessor : INetProcessor {
                     }
 
                     override fun onError(e: Throwable) {
-                        callback.onFailed(e.message.toString())
+                        callback.onFailed(e)
                     }
                 })
     }
@@ -61,19 +61,16 @@ class RetrofitProcessor : INetProcessor {
                     }
 
                     override fun onError(e: Throwable) {
-                        callback.onFailed(e.message.toString())
+                        callback.onFailed(e)
                     }
                 })
     }
 
-    override fun downloadFile(url: String, savePath: String, downloadListener: DownloadListener?) {
+    override fun downloadFile(url: String, savePath: String, callback: ICallback, downloadListener: DownloadListener?) {
         val splitUrlArr = UrlUtil.splitUrl(url)
         ApiService(splitUrlArr[0], downloadListener?.let {
             ProgressResponseBody.ProgressListener { totalSize, downSize ->
-                //借助rxandroid封装的
-                AndroidSchedulers.mainThread().scheduleDirect {
-                    downloadListener.onProgress(totalSize, downSize)
-                }
+                downloadListener.onProgress(totalSize, downSize)
             }
         }).iApiService.downloadFile(splitUrlArr[1])
                 .map {
@@ -90,19 +87,23 @@ class RetrofitProcessor : INetProcessor {
                     }
 
                     override fun onNext(t: String) {
-                        downloadListener?.onDownloadSucceed(t)
+                        callback.onSucceed(t)
                     }
 
                     override fun onError(e: Throwable) {
-                        downloadListener?.onDownloadFailed(e.message ?: "")
+                        callback.onFailed(e)
                     }
                 })
     }
 
-    override fun uploadFile(baseUrl: String, url: String, uploadFileMap: Map<String, File>, params: Map<String, String>, callback: ICallback) {
+    override fun uploadFile(baseUrl: String, url: String, uploadFileMap: Map<String, File>, params: Map<String, String>, callback: ICallback, uploadListener: UploadListener?) {
         val builder = MultipartBody.Builder().setType(MultipartBody.FORM)
         for (uploadFileEntry in uploadFileMap.entries) {
-            val fileBody = uploadFileEntry.value.asRequestBody("multipart/form-data".toMediaTypeOrNull())
+//            val fileBody = uploadFileEntry.value.asRequestBody("multipart/form-data".toMediaTypeOrNull())
+            val fileBody = DownloadProgressRequestBody(uploadFileEntry.value, "multipart/form-data",
+                    DownloadProgressRequestBody.UploadCallbacks { totalSize, uploadedSize ->
+                        uploadListener?.onProgress(totalSize, uploadedSize)
+                    })
             builder.addFormDataPart(uploadFileEntry.key, uploadFileEntry.value.name, fileBody)
             for (paramsEntry in params.entries) {
                 builder.addFormDataPart(paramsEntry.key, paramsEntry.value)
@@ -124,7 +125,7 @@ class RetrofitProcessor : INetProcessor {
                         }
 
                         override fun onError(e: Throwable) {
-                            callback.onFailed(e.message.toString())
+                            callback.onFailed(e)
                         }
                     })
         }

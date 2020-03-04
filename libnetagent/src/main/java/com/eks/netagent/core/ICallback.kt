@@ -6,5 +6,5 @@ package com.eks.netagent.core
  */
 interface ICallback {
     fun onSucceed(result: String)
-    fun onFailed(e: String)
+    fun onFailed(e: Any)
 }

@@ -26,12 +26,12 @@ object NetAgent : INetProcessor {
         mINetProcessor?.get(baseUrl, url, params, callback)
     }
 
-    override fun downloadFile(url: String, savePath: String, downloadListener: DownloadListener?) {
-        mINetProcessor?.downloadFile(url, savePath, downloadListener)
+    override fun downloadFile(url: String, savePath: String, callback: ICallback, downloadListener: DownloadListener?) {
+        mINetProcessor?.downloadFile(url, savePath, callback, downloadListener)
     }
 
-    override fun uploadFile(baseUrl: String, url: String, uploadFileMap: Map<String, File>, params: Map<String, String>, callback: ICallback) {
-        mINetProcessor?.uploadFile(baseUrl, url, uploadFileMap, params, callback)
+    override fun uploadFile(baseUrl: String, url: String, uploadFileMap: Map<String, File>, params: Map<String, String>, callback: ICallback, uploadListener: UploadListener?) {
+        mINetProcessor?.uploadFile(baseUrl, url, uploadFileMap, params, callback, uploadListener)
     }
 
     override fun setHeaders(headers: HashMap<String, String>) {
