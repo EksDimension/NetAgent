@@ -93,28 +93,6 @@ public class MainActivity extends PermissionActivity {
 
     public void download(View view) {
         String savePath = getProjectMainFolder() + "/navicat111_premium_cs_x64.exe";
-        DownloadListener downloadListener = new DownloadListener() {
-//            @Override
-//            public void onDownloadFailed(@NotNull String errMsg) {
-////                System.out.println("下载失败:"+errMsg);
-//                Toast.makeText(MainActivity.this, "下载失败:" + errMsg, Toast.LENGTH_SHORT).show();
-//            }
-
-//            @Override
-//            public void onDownloadSucceed(@NotNull String filePath) {
-////                System.out.println("下载完毕 路径:"+filePath);
-//                Toast.makeText(MainActivity.this, "下载完毕 路径:" + filePath, Toast.LENGTH_SHORT).show();
-//            }
-
-            @SuppressLint("SetTextI18n")
-            @Override
-            public void onProgress(long totalSize, long downSize) {
-
-//                System.out.println("总大小:" + totalSize + " 已下载:" + downSize);
-                btnDownload.setText(new DecimalFormat("0.00").format((Double.parseDouble(String.valueOf(downSize)) / Double.parseDouble(String.valueOf(totalSize))) * 100) + "%");
-//                System.out.println(downSize+" "+Thread.currentThread().getName());
-            }
-        };
         NetAgent.INSTANCE.downloadFile("https://static.zysccn.com/zykgsc/upload/img/ZykgBaseLib/navicat111_premium_cs_x64.exe", savePath, new NetCallbackImpl<String>() {
             @Override
             public void onFailed(@NotNull String errMsg) {
@@ -125,7 +103,14 @@ public class MainActivity extends PermissionActivity {
             public void onSucceed(@Nullable String filePath) {
                 Toast.makeText(MainActivity.this, "下载完毕 路径:" + filePath, Toast.LENGTH_SHORT).show();
             }
-        }, downloadListener);
+        }, new DownloadListener() {
+
+            @SuppressLint("SetTextI18n")
+            @Override
+            public void onProgress(long totalSize, long downSize) {
+                btnDownload.setText(new DecimalFormat("0.00").format((Double.parseDouble(String.valueOf(downSize)) / Double.parseDouble(String.valueOf(totalSize))) * 100) + "%");
+            }
+        });
     }
 
     public void upload(View view) {
@@ -135,11 +120,7 @@ public class MainActivity extends PermissionActivity {
         HashMap<String, String> params = new HashMap<>();
         params.put("methods", "DIY");
         params.put("paths", "ZykgBaseLib/");
-        NetAgent.INSTANCE.uploadFile(
-                "https://tool.zysccn.com/api/upload/unified"
-                , uploadFileMap
-                , params
-                , new NetCallbackImpl<BeanBase<BeanUploadFiles>>() {
+        NetAgent.INSTANCE.uploadFile("https://tool.zysccn.com/api/upload/unified", uploadFileMap, params, new NetCallbackImpl<BeanBase<BeanUploadFiles>>() {
                     @Override
                     public void onFailed(@NotNull String errMsg) {
                         Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_SHORT).show();
