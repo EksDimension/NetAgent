@@ -24,8 +24,9 @@ import java.io.File
  */
 class RetrofitProcessor : INetProcessor {
 
-    override fun post(baseUrl: String, url: String, params: Map<String, Any>, callback: ICallback) {
-        ApiService(baseUrl).iApiService.post(url, params as HashMap<String, Any>)
+    override fun post( url: String, params: Map<String, Any>, callback: ICallback) {
+        val splitUrlArr = UrlUtil.splitUrl(url)
+        ApiService(splitUrlArr[0]).iApiService.post(splitUrlArr[1], params as HashMap<String, Any>)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(object : Observer<Response<ResponseBody>> {
@@ -45,8 +46,9 @@ class RetrofitProcessor : INetProcessor {
                 })
     }
 
-    override fun get(baseUrl: String, url: String, params: Map<String, Any>, callback: ICallback) {
-        ApiService(baseUrl).iApiService.get(url, params as HashMap<String, Any>)
+    override fun get(url: String, params: Map<String, Any>, callback: ICallback) {
+        val splitUrlArr = UrlUtil.splitUrl(url)
+        ApiService(splitUrlArr[0]).iApiService.get(splitUrlArr[1], params as HashMap<String, Any>)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(object : Observer<Response<ResponseBody>> {
@@ -96,7 +98,7 @@ class RetrofitProcessor : INetProcessor {
                 })
     }
 
-    override fun uploadFile(baseUrl: String, url: String, uploadFileMap: Map<String, File>, params: Map<String, String>, callback: ICallback, uploadListener: UploadListener?) {
+    override fun uploadFile( url: String, uploadFileMap: Map<String, File>, params: Map<String, String>, callback: ICallback, uploadListener: UploadListener?) {
         val builder = MultipartBody.Builder().setType(MultipartBody.FORM)
         for (uploadFileEntry in uploadFileMap.entries) {
 //            val fileBody = uploadFileEntry.value.asRequestBody("multipart/form-data".toMediaTypeOrNull())
@@ -109,8 +111,8 @@ class RetrofitProcessor : INetProcessor {
                 builder.addFormDataPart(paramsEntry.key, paramsEntry.value)
             }
             val parts = builder.build().parts
-//            val splitUrlArr = UrlUtil.splitUrl(url)
-            ApiService(baseUrl).iApiService.uploadFile(url, parts)
+            val splitUrlArr = UrlUtil.splitUrl(url)
+            ApiService(splitUrlArr[0]).iApiService.uploadFile(splitUrlArr[1], parts)
                     .subscribeOn(Schedulers.io())
                     .observeOn(AndroidSchedulers.mainThread())
                     .subscribe(object : Observer<Response<ResponseBody>> {

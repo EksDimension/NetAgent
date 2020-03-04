@@ -56,12 +56,11 @@ public class MainActivity extends PermissionActivity {
         NetAgent.INSTANCE.setHeaders(headers);
         NetAgent.INSTANCE.addHeader("5555", "666666666666");
         NetAgent.INSTANCE.removeHeader("333");
-        String baseUrl = "https://apis.juhe.cn";
-        String url = "/obdcode/query";
+        String url = "https://apis.juhe.cn/obdcode/query";
         HashMap<String, Object> params = new HashMap<>();
         params.put("code", "P2079");
         params.put("key", "66010dabd6cfc61e55c07f68606e91c2");
-        NetAgent.INSTANCE.get(baseUrl, url, params, new NetCallbackImpl<BeanObdCodeQuery>() {
+        NetAgent.INSTANCE.get(url, params, new NetCallbackImpl<BeanObdCodeQuery>() {
             @Override
             public void onFailed(@NotNull String errMsg) {
                 Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_SHORT).show();
@@ -75,12 +74,11 @@ public class MainActivity extends PermissionActivity {
     }
 
     public void post(View view) {
-        String baseUrl = "https://v.juhe.cn";
-        String url = "/toutiao/index";
+        String url = "https://v.juhe.cn/toutiao/index";
         HashMap<String, Object> params = new HashMap<>();
         params.put("type", "shehui");
         params.put("key", "1883b1aa57644c2b775c608520f6cb2a");
-        NetAgent.INSTANCE.post(baseUrl, url, params, new NetCallbackImpl<BeanToutiao>() {
+        NetAgent.INSTANCE.post(url, params, new NetCallbackImpl<BeanToutiao>() {
             @Override
             public void onFailed(@NotNull String errMsg) {
                 Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_SHORT).show();
@@ -117,7 +115,7 @@ public class MainActivity extends PermissionActivity {
 //                System.out.println(downSize+" "+Thread.currentThread().getName());
             }
         };
-        NetAgent.INSTANCE.downloadFile("https://static.zysccn.com/zykgsc/upload/img/ZykgBaseLib/navicat111_premium_cs_x64.exe", savePath,new NetCallbackImpl<String>(){
+        NetAgent.INSTANCE.downloadFile("https://static.zysccn.com/zykgsc/upload/img/ZykgBaseLib/navicat111_premium_cs_x64.exe", savePath, new NetCallbackImpl<String>() {
             @Override
             public void onFailed(@NotNull String errMsg) {
                 Toast.makeText(MainActivity.this, "下载失败:" + errMsg, Toast.LENGTH_SHORT).show();
@@ -138,8 +136,7 @@ public class MainActivity extends PermissionActivity {
         params.put("methods", "DIY");
         params.put("paths", "ZykgBaseLib/");
         NetAgent.INSTANCE.uploadFile(
-                "https://tool.zysccn.com"
-                , "/api/upload/unified"
+                "https://tool.zysccn.com/api/upload/unified"
                 , uploadFileMap
                 , params
                 , new NetCallbackImpl<BeanBase<BeanUploadFiles>>() {

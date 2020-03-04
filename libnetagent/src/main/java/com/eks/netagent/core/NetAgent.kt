@@ -18,20 +18,20 @@ object NetAgent : INetProcessor {
     }
 
 
-    override fun post(baseUrl: String, url: String, params: Map<String, Any>, callback: ICallback) {
-        mINetProcessor?.post(baseUrl, url, params, callback)
+    override fun post(url: String, params: Map<String, Any>, callback: ICallback) {
+        mINetProcessor?.post(url, params, callback)
     }
 
-    override fun get(baseUrl: String, url: String, params: Map<String, Any>, callback: ICallback) {
-        mINetProcessor?.get(baseUrl, url, params, callback)
+    override fun get(url: String, params: Map<String, Any>, callback: ICallback) {
+        mINetProcessor?.get(url, params, callback)
     }
 
     override fun downloadFile(url: String, savePath: String, callback: ICallback, downloadListener: DownloadListener?) {
         mINetProcessor?.downloadFile(url, savePath, callback, downloadListener)
     }
 
-    override fun uploadFile(baseUrl: String, url: String, uploadFileMap: Map<String, File>, params: Map<String, String>, callback: ICallback, uploadListener: UploadListener?) {
-        mINetProcessor?.uploadFile(baseUrl, url, uploadFileMap, params, callback, uploadListener)
+    override fun uploadFile(url: String, uploadFileMap: Map<String, File>, params: Map<String, String>, callback: ICallback, uploadListener: UploadListener?) {
+        mINetProcessor?.uploadFile(url, uploadFileMap, params, callback, uploadListener)
     }
 
     override fun setHeaders(headers: HashMap<String, String>) {

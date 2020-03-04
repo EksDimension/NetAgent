@@ -7,13 +7,13 @@ import java.io.File
  * Created by Riggs on 2020/3/1
  */
 interface INetProcessor {
-    fun post(baseUrl: String, url: String, params: Map<String, Any>, callback: ICallback)
+    fun post(url: String, params: Map<String, Any>, callback: ICallback)
 
-    fun get(baseUrl: String, url: String, params: Map<String, Any>, callback: ICallback)
+    fun get(url: String, params: Map<String, Any>, callback: ICallback)
 
     fun downloadFile(url: String, savePath: String, callback: ICallback, downloadListener: DownloadListener?)
 
-    fun uploadFile(baseUrl: String, url: String, uploadFileMap: Map<String, File>, params: Map<String, String>, callback: ICallback, uploadListener: UploadListener?)
+    fun uploadFile(url: String, uploadFileMap: Map<String, File>, params: Map<String, String>, callback: ICallback, uploadListener: UploadListener?)
 
     fun setHeaders(headers: HashMap<String, String>)
 
