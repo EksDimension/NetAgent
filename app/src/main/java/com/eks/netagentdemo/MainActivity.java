@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.eks.netagent.core.DownloadListener;
@@ -32,10 +33,13 @@ public class MainActivity extends PermissionActivity {
     private Button btnDownload;
     private Button btnUpload;
 
+    private TextView resultTextView;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        resultTextView = findViewById(R.id.resultTextView);
         NetAgent.INSTANCE.setBaseUrl("https://apis.juhe.cn");
         HashMap<String, String> headers = new HashMap<String, String>();
         headers.put("header1", "AAA");
@@ -60,21 +64,25 @@ public class MainActivity extends PermissionActivity {
     }
 
     public void get(View view) {
+        resultTextView.setText("");
         String url = "obdcode/query";
         NetAgent.INSTANCE.request(RequestType.GET, null, url, null, null, new NetCallbackImpl<BeanObdCodeQuery>() {
             @Override
             public void onFailed(@NotNull String errMsg) {
                 Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_SHORT).show();
+                resultTextView.setText(errMsg);
             }
 
             @Override
             public void onSucceed(BeanObdCodeQuery objResult) {
                 Toast.makeText(MainActivity.this, objResult.toString(), Toast.LENGTH_SHORT).show();
+                resultTextView.setText(objResult.toString());
             }
         });
     }
 
     public void getWithQueryMap(View view) {
+        resultTextView.setText("");
         String url = "obdcode/query";
         HashMap<String, String> params = new HashMap<>();
         params.put("code", "P2079");
@@ -83,16 +91,19 @@ public class MainActivity extends PermissionActivity {
             @Override
             public void onFailed(@NotNull String errMsg) {
                 Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_SHORT).show();
+                resultTextView.setText(errMsg);
             }
 
             @Override
             public void onSucceed(BeanObdCodeQuery objResult) {
                 Toast.makeText(MainActivity.this, objResult.toString(), Toast.LENGTH_SHORT).show();
+                resultTextView.setText(objResult.toString());
             }
         });
     }
 
     public void getWithHeaderMap(View view) {
+        resultTextView.setText("");
         String url = "obdcode/query";
         HashMap<String, String> header = new HashMap<>();
         header.put("header4", "DDD");
@@ -101,16 +112,19 @@ public class MainActivity extends PermissionActivity {
             @Override
             public void onFailed(@NotNull String errMsg) {
                 Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_SHORT).show();
+                resultTextView.setText(errMsg);
             }
 
             @Override
             public void onSucceed(BeanObdCodeQuery objResult) {
                 Toast.makeText(MainActivity.this, objResult.toString(), Toast.LENGTH_SHORT).show();
+                resultTextView.setText(objResult.toString());
             }
         });
     }
 
     public void getWithQueryHeaderMap(View view) {
+        resultTextView.setText("");
         String url = "obdcode/query";
         HashMap<String, String> params = new HashMap<>();
         params.put("code", "P2079");
@@ -122,31 +136,37 @@ public class MainActivity extends PermissionActivity {
             @Override
             public void onFailed(@NotNull String errMsg) {
                 Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_SHORT).show();
+                resultTextView.setText(errMsg);
             }
 
             @Override
             public void onSucceed(BeanObdCodeQuery objResult) {
                 Toast.makeText(MainActivity.this, objResult.toString(), Toast.LENGTH_SHORT).show();
+                resultTextView.setText(objResult.toString());
             }
         });
     }
 
     public void post(View view) {
+        resultTextView.setText("");
         String url = "toutiao/index";
         NetAgent.INSTANCE.request(RequestType.POST, "https://v.juhe.cn", url, null, null, new NetCallbackImpl<BeanToutiao>() {
             @Override
             public void onFailed(@NotNull String errMsg) {
                 Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_SHORT).show();
+                resultTextView.setText(errMsg);
             }
 
             @Override
             public void onSucceed(BeanToutiao objResult) {
                 Toast.makeText(MainActivity.this, objResult.toString(), Toast.LENGTH_SHORT).show();
+                resultTextView.setText(objResult.toString());
             }
         });
     }
 
     public void postWithFieldMap(View view) {
+        resultTextView.setText("");
         String url = "toutiao/index";
         HashMap<String, String> params = new HashMap<>();
         params.put("type", "shehui");
@@ -155,16 +175,19 @@ public class MainActivity extends PermissionActivity {
             @Override
             public void onFailed(@NotNull String errMsg) {
                 Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_SHORT).show();
+                resultTextView.setText(errMsg);
             }
 
             @Override
             public void onSucceed(BeanToutiao objResult) {
                 Toast.makeText(MainActivity.this, objResult.toString(), Toast.LENGTH_SHORT).show();
+                resultTextView.setText(objResult.toString());
             }
         });
     }
 
     public void postWithHeaderMap(View view) {
+        resultTextView.setText("");
         String url = "toutiao/index";
         HashMap<String, String> header = new HashMap<>();
         header.put("header4", "DDD");
@@ -173,16 +196,19 @@ public class MainActivity extends PermissionActivity {
             @Override
             public void onFailed(@NotNull String errMsg) {
                 Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_SHORT).show();
+                resultTextView.setText(errMsg);
             }
 
             @Override
             public void onSucceed(BeanToutiao objResult) {
                 Toast.makeText(MainActivity.this, objResult.toString(), Toast.LENGTH_SHORT).show();
+                resultTextView.setText(objResult.toString());
             }
         });
     }
 
     public void postWithFieldHeaderMap(View view) {
+        resultTextView.setText("");
         String url = "toutiao/index";
         HashMap<String, String> params = new HashMap<>();
         params.put("type", "shehui");
@@ -194,26 +220,31 @@ public class MainActivity extends PermissionActivity {
             @Override
             public void onFailed(@NotNull String errMsg) {
                 Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_SHORT).show();
+                resultTextView.setText(errMsg);
             }
 
             @Override
             public void onSucceed(BeanToutiao objResult) {
                 Toast.makeText(MainActivity.this, objResult.toString(), Toast.LENGTH_SHORT).show();
+                resultTextView.setText(objResult.toString());
             }
         });
     }
 
     public void download(View view) {
+        resultTextView.setText("");
         String savePath = getProjectMainFolder() + "/navicat111_premium_cs_x64.exe";
         NetAgent.INSTANCE.downloadFile("https://static.zysccn.com/zykgsc/upload/img/ZykgBaseLib/navicat111_premium_cs_x64.exe", savePath, new NetCallbackImpl<String>() {
             @Override
             public void onFailed(@NotNull String errMsg) {
                 Toast.makeText(MainActivity.this, "下载失败:" + errMsg, Toast.LENGTH_SHORT).show();
+                resultTextView.setText("下载失败:" + errMsg);
             }
 
             @Override
             public void onSucceed(@Nullable String filePath) {
                 Toast.makeText(MainActivity.this, "下载完毕 路径:" + filePath, Toast.LENGTH_SHORT).show();
+                resultTextView.setText("下载完毕 路径:" + filePath);
             }
         }, new DownloadListener() {
 
@@ -221,11 +252,13 @@ public class MainActivity extends PermissionActivity {
             @Override
             public void onProgress(long totalSize, long downSize) {
                 btnDownload.setText(new DecimalFormat("0.00").format((Double.parseDouble(String.valueOf(downSize)) / Double.parseDouble(String.valueOf(totalSize))) * 100) + "%");
+                resultTextView.setText(new DecimalFormat("0.00").format((Double.parseDouble(String.valueOf(downSize)) / Double.parseDouble(String.valueOf(totalSize))) * 100) + "%");
             }
         });
     }
 
     public void upload(View view) {
+        resultTextView.setText("");
         String filePath = getProjectMainFolder() + "/navicat111_premium_cs_x86.exe";
         HashMap<String, File> uploadFileMap = new HashMap<>();
         uploadFileMap.put("myFile", new File(filePath));
@@ -236,11 +269,13 @@ public class MainActivity extends PermissionActivity {
                     @Override
                     public void onFailed(@NotNull String errMsg) {
                         Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_SHORT).show();
+                        resultTextView.setText(errMsg);
                     }
 
                     @Override
                     public void onSucceed(@Nullable BeanBase<BeanUploadFiles> beanUploadFilesBeanBase) {
                         Toast.makeText(MainActivity.this, "上传完毕 路径:" + beanUploadFilesBeanBase.getData().getPath(), Toast.LENGTH_SHORT).show();
+                        resultTextView.setText("上传完毕 路径:" + beanUploadFilesBeanBase.getData().getPath());
                     }
                 }
                 , new UploadListener() {
@@ -248,6 +283,7 @@ public class MainActivity extends PermissionActivity {
                     @Override
                     public void onProgress(long totalSize, long uploadedSize) {
                         btnUpload.setText(new DecimalFormat("0.00").format((Double.parseDouble(String.valueOf(uploadedSize)) / Double.parseDouble(String.valueOf(totalSize))) * 100) + "%");
+                        resultTextView.setText(new DecimalFormat("0.00").format((Double.parseDouble(String.valueOf(uploadedSize)) / Double.parseDouble(String.valueOf(totalSize))) * 100) + "%");
                     }
                 }
         );
@@ -257,10 +293,10 @@ public class MainActivity extends PermissionActivity {
      * 获取项目根目录
      */
     public File getProjectMainFolder() {
-        if(Build.VERSION.SDK_INT >=Build.VERSION_CODES.Q){
-            File s = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-            return s;
-        }else{
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            File file = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+            return file;
+        } else {
             if (getSdcardPath() == null) {
                 return null;
             } else {

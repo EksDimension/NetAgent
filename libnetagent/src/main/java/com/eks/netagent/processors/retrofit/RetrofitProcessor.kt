@@ -7,11 +7,11 @@ import com.eks.netagent.processors.retrofit.responsebody.DownloadProgressRequest
 import com.eks.netagent.processors.retrofit.responsebody.ProgressResponseBody
 import com.eks.netagent.utils.FileUtil
 import com.eks.netagent.utils.UrlUtil
-import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import kotlinx.coroutines.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -55,52 +55,59 @@ class RetrofitProcessor : INetProcessor {
         headers: Map<String, String>?,
         callback: ICallback
     ) {
-        var baseUrl: String?
-        baseUrl = commonBaseUrl
-        if (designatedBaseUrl != null) {
-            baseUrl = designatedBaseUrl
-        }
-        if (baseUrl == null || baseUrl.isEmpty()) return
-        var observable: Observable<Response<ResponseBody>>? = null
-        if (requestType == RequestType.GET) {
-            observable = if (params != null && headers != null) {
-                ApiService(baseUrl).iApiService.getWithQueryHeaderMaps(url, params, headers)
-            } else if (params != null && headers == null) {
-                ApiService(baseUrl).iApiService.getWithQueryMap(url, params)
-            } else if (params == null && headers != null) {
-                ApiService(baseUrl).iApiService.getWithHeaderMap(url, headers)
-            } else {
-                ApiService(baseUrl).iApiService.get(url)
+        GlobalScope.launch(Dispatchers.Main) Scope@{
+            var baseUrl: String?
+            baseUrl = commonBaseUrl
+            if (designatedBaseUrl != null) {
+                baseUrl = designatedBaseUrl
             }
-        } else if (requestType == RequestType.POST) {
-            observable = if (params != null && headers != null) {
-                ApiService(baseUrl).iApiService.postWithFieldHeaderMaps(url, params, headers)
-            } else if (params != null && headers == null) {
-                ApiService(baseUrl).iApiService.postWithFieldMap(url, params)
-            } else if (params == null && headers != null) {
-                ApiService(baseUrl).iApiService.postWithHeaderMap(url, headers)
+            if (baseUrl == null || baseUrl.isEmpty()) return@Scope
+            val response: Response<ResponseBody> =
+                processRequest(requestType, params, headers, baseUrl, url)
+            val responseString = processResponse(response)
+            callback.onSucceed(responseString)
+        }
+    }
+
+    private suspend fun processRequest(
+        requestType: RequestType,
+        params: Map<String, String>?,
+        headers: Map<String, String>?,
+        baseUrl: String,
+        url: String
+    ): Response<ResponseBody> {
+        return withContext(Dispatchers.IO) {
+            if (requestType == RequestType.GET) {
+                if (params != null && headers != null) {
+                    ApiService(baseUrl).iApiService.getWithQueryHeaderMaps(url, params, headers)
+                } else if (params != null && headers == null) {
+                    ApiService(baseUrl).iApiService.getWithQueryMap(url, params)
+                } else if (params == null && headers != null) {
+                    ApiService(baseUrl).iApiService.getWithHeaderMap(url, headers)
+                } else {
+                    ApiService(baseUrl).iApiService.get(url)
+                }
             } else {
-                ApiService(baseUrl).iApiService.post(url)
+                if (params != null && headers != null) {
+                    ApiService(baseUrl).iApiService.postWithFieldHeaderMaps(
+                        url,
+                        params,
+                        headers
+                    )
+                } else if (params != null && headers == null) {
+                    ApiService(baseUrl).iApiService.postWithFieldMap(url, params)
+                } else if (params == null && headers != null) {
+                    ApiService(baseUrl).iApiService.postWithHeaderMap(url, headers)
+                } else {
+                    ApiService(baseUrl).iApiService.post(url)
+                }
             }
         }
-        observable?.apply {
-            subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(object : Observer<Response<ResponseBody>> {
-                    override fun onComplete() {
-                    }
+    }
 
-                    override fun onSubscribe(d: Disposable) {
-                    }
-
-                    override fun onNext(t: Response<ResponseBody>) {
-                        callback.onSucceed(t.body()?.string() ?: "")
-                    }
-
-                    override fun onError(e: Throwable) {
-                        callback.onFailed(e)
-                    }
-                })
+    private fun processResponse(response: Response<ResponseBody>): String = runBlocking {
+        return@runBlocking withContext(Dispatchers.IO) {
+            response.body()?.string() ?: ""
         }
     }
 
@@ -160,8 +167,8 @@ class RetrofitProcessor : INetProcessor {
     ) {
         val builder = MultipartBody.Builder().setType(MultipartBody.FORM)
         for (uploadFileEntry in uploadFileMap.entries) {
-//            val fileBody = uploadFileEntry.value.asRequestBody("multipart/form-data".toMediaTypeOrNull())
-            val fileBody = DownloadProgressRequestBody(uploadFileEntry.value, "multipart/form-data"
+            val fileBody = DownloadProgressRequestBody(
+                uploadFileEntry.value, "multipart/form-data"
             ) { totalSize, uploadedSize ->
                 uploadListener?.onProgress(totalSize, uploadedSize)
             }
