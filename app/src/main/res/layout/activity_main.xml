@@ -1,13 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.appcompat.widget.LinearLayoutCompat xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
     <Button
-        android:id="@+id/btn"
+        android:id="@+id/btnGet"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="get"
@@ -19,11 +21,80 @@
         app:layout_constraintVertical_chainStyle="packed" />
 
     <Button
-        android:id="@+id/btnPost"
+        android:id="@+id/btnGetWithQueryMap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="getWithQueryMap"
+        android:text="getWithQueryMap"
+        app:layout_constraintBottom_toTopOf="@id/btnPost"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <Button
+        android:id="@+id/getWithHeaderMap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="getWithHeaderMap"
+        android:text="getWithHeaderMap"
+        app:layout_constraintBottom_toTopOf="@id/btnPost"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <Button
+        android:id="@+id/btnGetWithQueryHeaderMap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="getWithQueryHeaderMap"
+        android:text="getWithQueryHeaderMap"
+        app:layout_constraintBottom_toTopOf="@id/btnPost"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <Button
+        android:id="@+id/post"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:onClick="post"
         android:text="post"
+        app:layout_constraintBottom_toTopOf="@id/btnDownload"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn" />
+
+    <Button
+        android:id="@+id/postWithFieldMap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="postWithFieldMap"
+        android:text="postWithFieldMap"
+        app:layout_constraintBottom_toTopOf="@id/btnDownload"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn" />
+
+    <Button
+        android:id="@+id/postWithHeaderMap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="postWithHeaderMap"
+        android:text="postWithHeaderMap"
+        app:layout_constraintBottom_toTopOf="@id/btnDownload"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn" />
+
+    <Button
+        android:id="@+id/postWithFieldHeaderMap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="postWithFieldHeaderMap"
+        android:text="postWithFieldHeaderMap"
         app:layout_constraintBottom_toTopOf="@id/btnDownload"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -50,4 +121,4 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/btnDownload" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.appcompat.widget.LinearLayoutCompat>

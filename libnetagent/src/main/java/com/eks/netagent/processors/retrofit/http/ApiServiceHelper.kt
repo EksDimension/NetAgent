@@ -29,6 +29,7 @@ object ApiServiceHelper {
                 .readTimeout(10, TimeUnit.SECONDS)
         //如果有请求头拦截器就加入
         mBuilder.addInterceptor(defaultHeaderInterceptor)
+        mBuilder.addInterceptor(httpLoggingInterceptor)
         //如果有下载拦截器就加入
         progressListener?.let { pL ->
             mBuilder.addNetworkInterceptor { chain ->

@@ -1,6 +1,7 @@
 package com.eks.netagent.core
 
 import com.google.gson.Gson
+import java.lang.Exception
 import java.lang.reflect.ParameterizedType
 import java.lang.reflect.Type
 
@@ -17,10 +18,13 @@ abstract class NetCallbackImpl<Result> : ICallback {
         val clz = analysisClassInfo(this)
 
         //把String转成javaBean对象
-        val objResult = gson.fromJson<Result>(result, clz)
-
-        //把结果交给开发者
-        onSucceed(objResult)
+        try {
+            val objResult = gson.fromJson<Result>(result, clz)
+            //把结果交给开发者
+            onSucceed(objResult)
+        } catch (e:Exception){
+            onFailed(e.message.toString())
+        }
     }
 
     override fun onFailed(e: Any) {
@@ -41,7 +45,6 @@ abstract class NetCallbackImpl<Result> : ICallback {
         //getActualTypeArguments()获取真实参数
         val paramsArr = (genType as ParameterizedType).actualTypeArguments
         return paramsArr[0]
-
     }
 
     /**
