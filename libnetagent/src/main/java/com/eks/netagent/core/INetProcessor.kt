@@ -7,9 +7,10 @@ import java.io.File
  * Created by Riggs on 2020/3/1
  */
 interface INetProcessor {
-    fun post(url: String, params: Map<String, Any>, callback: ICallback)
 
-    fun get(
+    fun request(
+        requestType: RequestType,
+        designatedBaseUrl: String?,
         url: String,
         params: Map<String, String>?,
         headers: Map<String, String>?,
@@ -30,6 +31,8 @@ interface INetProcessor {
         callback: ICallback,
         uploadListener: UploadListener?
     )
+
+    fun setBaseUrl(baseUrl: String)
 
     fun setHeaders(headers: HashMap<String, String>)
 

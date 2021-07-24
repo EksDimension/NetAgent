@@ -1,9 +1,6 @@
 package com.eks.netagent.processors.retrofit
 
-import com.eks.netagent.core.DownloadListener
-import com.eks.netagent.core.ICallback
-import com.eks.netagent.core.INetProcessor
-import com.eks.netagent.core.UploadListener
+import com.eks.netagent.core.*
 import com.eks.netagent.processors.retrofit.http.ApiService
 import com.eks.netagent.processors.retrofit.http.ApiServiceHelper
 import com.eks.netagent.processors.retrofit.responsebody.DownloadProgressRequestBody
@@ -15,8 +12,11 @@ import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
 import io.reactivex.schedulers.Schedulers
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
+import okhttp3.RequestBody
 import okhttp3.ResponseBody
+import org.json.JSONObject
 import retrofit2.Response
 import java.io.File
 
@@ -25,74 +25,105 @@ import java.io.File
  */
 class RetrofitProcessor : INetProcessor {
 
-    override fun post(url: String, params: Map<String, Any>, callback: ICallback) {
-        val splitUrlArr = UrlUtil.splitUrl(url)
-        ApiService(splitUrlArr[0]).iApiService.post(splitUrlArr[1], params as HashMap<String, Any>)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(object : Observer<Response<ResponseBody>> {
-                override fun onComplete() {
-                }
+    /**
+     * common baseurl , it will be effected in the whole app journey
+     */
+    private var commonBaseUrl: String? = null
 
-                override fun onSubscribe(d: Disposable) {
-                }
-
-                override fun onNext(t: Response<ResponseBody>) {
-                    callback.onSucceed(t.body()?.string() ?: "")
-                }
-
-                override fun onError(e: Throwable) {
-                    callback.onFailed(e)
-                }
-            })
+    override fun setBaseUrl(baseUrl: String) {
+        commonBaseUrl = baseUrl
     }
 
-    override fun get(
+    override fun setHeaders(headers: HashMap<String, String>) {
+        ApiServiceHelper.headers = headers
+    }
+
+    override fun addHeader(key: String, value: String) {
+        ApiServiceHelper.headers[key] = value
+    }
+
+    override fun removeHeader(key: String) {
+        ApiServiceHelper.headers.remove(key)
+    }
+
+    override fun request(
+        requestType: RequestType,
+        designatedBaseUrl: String?,
         url: String,
         params: Map<String, String>?,
         headers: Map<String, String>?,
         callback: ICallback
     ) {
-        val splitUrlArr = UrlUtil.splitUrl(url)
-        val observable: Observable<Response<ResponseBody>>
-        if (params != null && headers != null) {
-            observable = ApiService(splitUrlArr[0]).iApiService.getWithQueryHeaderMaps(
-                splitUrlArr[1],
-                params,
-                headers
-            )
-        } else if (params != null && headers == null) {
-            observable = ApiService(splitUrlArr[0]).iApiService.getWithQueryMap(
-                splitUrlArr[1],
-                params
-            )
-        } else if (params == null && headers != null) {
-            observable = ApiService(splitUrlArr[0]).iApiService.getWithHeaderMap(
-                splitUrlArr[1],
-                headers
-            )
-        } else {
-            observable = ApiService(splitUrlArr[0]).iApiService.get(
-                splitUrlArr[1]
-            )
+        var baseUrl: String?
+        baseUrl = commonBaseUrl
+        if (designatedBaseUrl != null) {
+            baseUrl = designatedBaseUrl
         }
-        observable.subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(object : Observer<Response<ResponseBody>> {
-                override fun onComplete() {
+        if (baseUrl == null || baseUrl.isEmpty()) return
+        var observable: Observable<Response<ResponseBody>>? = null
+        if (requestType == RequestType.GET) {
+            observable = if (params != null && headers != null) {
+                ApiService(baseUrl).iApiService.getWithQueryHeaderMaps(url, params, headers)
+            } else if (params != null && headers == null) {
+                ApiService(baseUrl).iApiService.getWithQueryMap(url, params)
+            } else if (params == null && headers != null) {
+                ApiService(baseUrl).iApiService.getWithHeaderMap(url, headers)
+            } else {
+                ApiService(baseUrl).iApiService.get(url)
+            }
+        } else if (requestType == RequestType.POST) {
+            observable = if (params != null && headers != null) {
+                generatePostBody(params).let { requestBody ->
+                    ApiService(baseUrl).iApiService.postWithBodyHeaderMaps(
+                        url,
+                        requestBody,
+                        headers
+                    )
                 }
+            } else if (params != null && headers == null) {
+                generatePostBody(params).let { requestBody ->
+                    ApiService(baseUrl).iApiService.postWithBody(
+                        url,
+                        requestBody,
+                    )
+                }
+            } else if (params == null && headers != null) {
+                ApiService(baseUrl).iApiService.postWithHeaderMap(url, headers)
+            } else {
+                ApiService(baseUrl).iApiService.post(url)
+            }
+        }
+        observable?.apply {
+            subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(object : Observer<Response<ResponseBody>> {
+                    override fun onComplete() {
+                    }
 
-                override fun onSubscribe(d: Disposable) {
-                }
+                    override fun onSubscribe(d: Disposable) {
+                    }
 
-                override fun onNext(t: Response<ResponseBody>) {
-                    callback.onSucceed(t.body()?.string() ?: "")
-                }
+                    override fun onNext(t: Response<ResponseBody>) {
+                        callback.onSucceed(t.body()?.string() ?: "")
+                    }
 
-                override fun onError(e: Throwable) {
-                    callback.onFailed(e)
-                }
-            })
+                    override fun onError(e: Throwable) {
+                        callback.onFailed(e)
+                    }
+                })
+        }
+    }
+
+    private fun generatePostBody(params: Map<String, String>): RequestBody {
+        val paramString = JSONObject(params).toString()
+            .replace("\"{", "{")
+            .replace("}\"", "}")
+            .replace("\\\"", "\"")
+            .replace("\"[", "[")
+            .replace("]\"", "]")
+        return RequestBody.create(
+            "application/json;charset=utf-8".toMediaTypeOrNull(), paramString
+        )
     }
 
     override fun downloadFile(
@@ -170,18 +201,6 @@ class RetrofitProcessor : INetProcessor {
                 })
         }
 
-    }
-
-    override fun setHeaders(headers: HashMap<String, String>) {
-        ApiServiceHelper.headers = headers
-    }
-
-    override fun addHeader(key: String, value: String) {
-        ApiServiceHelper.headers[key] = value
-    }
-
-    override fun removeHeader(key: String) {
-        ApiServiceHelper.headers.remove(key)
     }
 
 }

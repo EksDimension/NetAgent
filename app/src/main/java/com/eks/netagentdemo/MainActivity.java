@@ -10,6 +10,7 @@ import android.widget.Toast;
 import com.eks.netagent.core.DownloadListener;
 import com.eks.netagent.core.NetAgent;
 import com.eks.netagent.core.NetCallbackImpl;
+import com.eks.netagent.core.RequestType;
 import com.eks.netagent.core.UploadListener;
 
 import org.jetbrains.annotations.NotNull;
@@ -33,6 +34,7 @@ public class MainActivity extends PermissionActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        NetAgent.INSTANCE.setBaseUrl("https://apis.juhe.cn");
         HashMap<String, String> headers = new HashMap<String, String>();
         headers.put("header1", "AAA");
         headers.put("header2", "BBB");
@@ -56,8 +58,8 @@ public class MainActivity extends PermissionActivity {
     }
 
     public void get(View view) {
-        String url = "https://apis.juhe.cn/obdcode/query";
-        NetAgent.INSTANCE.get(url, null, null, new NetCallbackImpl<BeanObdCodeQuery>() {
+        String url = "obdcode/query";
+        NetAgent.INSTANCE.request(RequestType.GET, null, url, null, null, new NetCallbackImpl<BeanObdCodeQuery>() {
             @Override
             public void onFailed(@NotNull String errMsg) {
                 Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_SHORT).show();
@@ -71,11 +73,11 @@ public class MainActivity extends PermissionActivity {
     }
 
     public void getWithQueryMap(View view) {
-        String url = "https://apis.juhe.cn/obdcode/query";
+        String url = "obdcode/query";
         HashMap<String, String> params = new HashMap<>();
         params.put("code", "P2079");
         params.put("key", "66010dabd6cfc61e55c07f68606e91c2");
-        NetAgent.INSTANCE.get(url, params, null, new NetCallbackImpl<BeanObdCodeQuery>() {
+        NetAgent.INSTANCE.request(RequestType.GET, null, url, params, null, new NetCallbackImpl<BeanObdCodeQuery>() {
             @Override
             public void onFailed(@NotNull String errMsg) {
                 Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_SHORT).show();
@@ -89,11 +91,11 @@ public class MainActivity extends PermissionActivity {
     }
 
     public void btnGetWithHeaderMap(View view) {
-        String url = "https://apis.juhe.cn/obdcode/query";
+        String url = "obdcode/query";
         HashMap<String, String> header = new HashMap<>();
         header.put("header4", "DDD");
         header.put("header5", "EEE");
-        NetAgent.INSTANCE.get(url, null, header, new NetCallbackImpl<BeanObdCodeQuery>() {
+        NetAgent.INSTANCE.request(RequestType.GET, null, url, null, header, new NetCallbackImpl<BeanObdCodeQuery>() {
             @Override
             public void onFailed(@NotNull String errMsg) {
                 Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_SHORT).show();
@@ -107,14 +109,14 @@ public class MainActivity extends PermissionActivity {
     }
 
     public void getWithQueryHeaderMap(View view) {
-        String url = "https://apis.juhe.cn/obdcode/query";
+        String url = "obdcode/query";
         HashMap<String, String> params = new HashMap<>();
         params.put("code", "P2079");
         params.put("key", "66010dabd6cfc61e55c07f68606e91c2");
         HashMap<String, String> header = new HashMap<>();
         header.put("header4", "DDD");
         header.put("header5", "EEE");
-        NetAgent.INSTANCE.get(url, params, header, new NetCallbackImpl<BeanObdCodeQuery>() {
+        NetAgent.INSTANCE.request(RequestType.GET, null, url, params, header, new NetCallbackImpl<BeanObdCodeQuery>() {
             @Override
             public void onFailed(@NotNull String errMsg) {
                 Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_SHORT).show();
@@ -127,12 +129,12 @@ public class MainActivity extends PermissionActivity {
         });
     }
 
-    public void post(View view) {
-        String url = "https://v.juhe.cn/toutiao/index";
-        HashMap<String, Object> params = new HashMap<>();
+    public void postWithBody(View view) {
+        String url = "toutiao/index";
+        HashMap<String, String> params = new HashMap<>();
         params.put("type", "shehui");
         params.put("key", "1883b1aa57644c2b775c608520f6cb2a");
-        NetAgent.INSTANCE.post(url, params, new NetCallbackImpl<BeanToutiao>() {
+        NetAgent.INSTANCE.request(RequestType.POST, "https://v.juhe.cn", url, params, null, new NetCallbackImpl<BeanToutiao>() {
             @Override
             public void onFailed(@NotNull String errMsg) {
                 Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_SHORT).show();

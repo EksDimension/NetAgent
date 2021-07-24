@@ -16,18 +16,23 @@ object NetAgent : INetProcessor {
         mINetProcessor = iNetProcessor
     }
 
-
-    override fun post(url: String, params: Map<String, Any>, callback: ICallback) {
-        mINetProcessor?.post(url, params, callback)
-    }
-
-    override fun get(
+    /**
+     * core request method
+     * @param designatedBaseUrl set only if a specially designated BaseUrl is needed
+     * @param url the rest url behind BaseUrl
+     * @param params the params for the request
+     * @param headers the supplement headers for the request except for common headers
+     * @param callback the callback with success or fail response
+     */
+    override fun request(
+        requestType: RequestType,
+        designatedBaseUrl: String?,
         url: String,
         params: Map<String, String>?,
         headers: Map<String, String>?,
         callback: ICallback
     ) {
-        mINetProcessor?.get(url, params, headers, callback)
+        mINetProcessor?.request(requestType, designatedBaseUrl, url, params, headers, callback)
     }
 
     override fun downloadFile(
@@ -47,6 +52,10 @@ object NetAgent : INetProcessor {
         uploadListener: UploadListener?
     ) {
         mINetProcessor?.uploadFile(url, uploadFileMap, params, callback, uploadListener)
+    }
+
+    override fun setBaseUrl(baseUrl: String) {
+        mINetProcessor?.setBaseUrl(baseUrl)
     }
 
     override fun setHeaders(headers: HashMap<String, String>) {
