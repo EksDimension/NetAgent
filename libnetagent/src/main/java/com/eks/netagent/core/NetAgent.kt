@@ -8,7 +8,6 @@ import java.io.File
  */
 object NetAgent : INetProcessor {
 
-
     //真正网络请求框架
     private var mINetProcessor: INetProcessor? = null
 
@@ -22,15 +21,35 @@ object NetAgent : INetProcessor {
         mINetProcessor?.post(url, params, callback)
     }
 
-    override fun get(url: String, params: Map<String, Any>, callback: ICallback) {
+    override fun get(url: String, params: Map<String, String>, callback: ICallback) {
         mINetProcessor?.get(url, params, callback)
     }
 
-    override fun downloadFile(url: String, savePath: String, callback: ICallback, downloadListener: DownloadListener?) {
+    override fun get(
+        url: String,
+        params: Map<String, String>?,
+        headers: Map<String, String>?,
+        callback: ICallback
+    ) {
+        mINetProcessor?.get(url, params, headers, callback)
+    }
+
+    override fun downloadFile(
+        url: String,
+        savePath: String,
+        callback: ICallback,
+        downloadListener: DownloadListener?
+    ) {
         mINetProcessor?.downloadFile(url, savePath, callback, downloadListener)
     }
 
-    override fun uploadFile(url: String, uploadFileMap: Map<String, File>, params: Map<String, String>, callback: ICallback, uploadListener: UploadListener?) {
+    override fun uploadFile(
+        url: String,
+        uploadFileMap: Map<String, File>,
+        params: Map<String, String>,
+        callback: ICallback,
+        uploadListener: UploadListener?
+    ) {
         mINetProcessor?.uploadFile(url, uploadFileMap, params, callback, uploadListener)
     }
 

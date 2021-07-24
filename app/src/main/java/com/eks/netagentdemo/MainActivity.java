@@ -34,11 +34,11 @@ public class MainActivity extends PermissionActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         HashMap<String, String> headers = new HashMap<String, String>();
-        headers.put("11111111", "AAA");
-        headers.put("333", "CCC");
+        headers.put("header1", "AAA");
+        headers.put("header2", "BBB");
         NetAgent.INSTANCE.setHeaders(headers);
-        NetAgent.INSTANCE.addHeader("5555", "EEE");
-        NetAgent.INSTANCE.removeHeader("333");
+        NetAgent.INSTANCE.addHeader("header3", "CCC");
+        NetAgent.INSTANCE.removeHeader("header2");
         btnDownload = findViewById(R.id.btnDownload);
         btnUpload = findViewById(R.id.btnUpload);
         requestRuntimePermission(permissionArray, new PermissionListener() {
@@ -55,12 +55,33 @@ public class MainActivity extends PermissionActivity {
 
     }
 
-    public void get(View view) {
+    public void getWithQueryMap(View view) {
         String url = "https://apis.juhe.cn/obdcode/query";
-        HashMap<String, Object> params = new HashMap<>();
+        HashMap<String, String> params = new HashMap<>();
         params.put("code", "P2079");
         params.put("key", "66010dabd6cfc61e55c07f68606e91c2");
         NetAgent.INSTANCE.get(url, params, new NetCallbackImpl<BeanObdCodeQuery>() {
+            @Override
+            public void onFailed(@NotNull String errMsg) {
+                Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onSucceed(BeanObdCodeQuery objResult) {
+                Toast.makeText(MainActivity.this, objResult.toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void getWithQueryHeaderMap(View view) {
+        String url = "https://apis.juhe.cn/obdcode/query";
+        HashMap<String, String> params = new HashMap<>();
+        params.put("code", "P2079");
+        params.put("key", "66010dabd6cfc61e55c07f68606e91c2");
+        HashMap<String, String> header = new HashMap<>();
+        header.put("header4", "DDD");
+        header.put("header5", "EEE");
+        NetAgent.INSTANCE.get(url, params, header, new NetCallbackImpl<BeanObdCodeQuery>() {
             @Override
             public void onFailed(@NotNull String errMsg) {
                 Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_SHORT).show();

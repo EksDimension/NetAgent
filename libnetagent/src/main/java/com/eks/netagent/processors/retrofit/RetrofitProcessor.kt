@@ -24,31 +24,63 @@ import java.io.File
  */
 class RetrofitProcessor : INetProcessor {
 
-    override fun post( url: String, params: Map<String, Any>, callback: ICallback) {
+    override fun post(url: String, params: Map<String, Any>, callback: ICallback) {
         val splitUrlArr = UrlUtil.splitUrl(url)
         ApiService(splitUrlArr[0]).iApiService.post(splitUrlArr[1], params as HashMap<String, Any>)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(object : Observer<Response<ResponseBody>> {
-                    override fun onComplete() {
-                    }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(object : Observer<Response<ResponseBody>> {
+                override fun onComplete() {
+                }
 
-                    override fun onSubscribe(d: Disposable) {
-                    }
+                override fun onSubscribe(d: Disposable) {
+                }
 
-                    override fun onNext(t: Response<ResponseBody>) {
-                        callback.onSucceed(t.body()?.string() ?: "")
-                    }
+                override fun onNext(t: Response<ResponseBody>) {
+                    callback.onSucceed(t.body()?.string() ?: "")
+                }
 
-                    override fun onError(e: Throwable) {
-                        callback.onFailed(e)
-                    }
-                })
+                override fun onError(e: Throwable) {
+                    callback.onFailed(e)
+                }
+            })
     }
 
-    override fun get(url: String, params: Map<String, Any>, callback: ICallback) {
+    override fun get(url: String, params: Map<String, String>, callback: ICallback) {
         val splitUrlArr = UrlUtil.splitUrl(url)
-        ApiService(splitUrlArr[0]).iApiService.get(splitUrlArr[1], params as HashMap<String, Any>)
+        ApiService(splitUrlArr[0]).iApiService.get(splitUrlArr[1], params)
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(object : Observer<Response<ResponseBody>> {
+                override fun onComplete() {
+                }
+
+                override fun onSubscribe(d: Disposable) {
+                }
+
+                override fun onNext(t: Response<ResponseBody>) {
+                    callback.onSucceed(t.body()?.string() ?: "")
+                }
+
+                override fun onError(e: Throwable) {
+                    callback.onFailed(e)
+                }
+            })
+    }
+
+    override fun get(
+        url: String,
+        params: Map<String, String>?,
+        headers: Map<String, String>?,
+        callback: ICallback
+    ) {
+        val splitUrlArr = UrlUtil.splitUrl(url)
+        if (params != null && headers != null) {
+            ApiService(splitUrlArr[0]).iApiService.get(
+                splitUrlArr[1],
+                params,
+                headers
+            )
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(object : Observer<Response<ResponseBody>> {
@@ -66,46 +98,58 @@ class RetrofitProcessor : INetProcessor {
                         callback.onFailed(e)
                     }
                 })
+        }
     }
 
-    override fun downloadFile(url: String, savePath: String, callback: ICallback, downloadListener: DownloadListener?) {
+    override fun downloadFile(
+        url: String,
+        savePath: String,
+        callback: ICallback,
+        downloadListener: DownloadListener?
+    ) {
         val splitUrlArr = UrlUtil.splitUrl(url)
         ApiService(splitUrlArr[0], downloadListener?.let {
             ProgressResponseBody.ProgressListener { totalSize, downSize ->
                 downloadListener.onProgress(totalSize, downSize)
             }
         }).iApiService.downloadFile(splitUrlArr[1])
-                .map {
-                    val file = FileUtil.saveFile(savePath, it)
-                    file.path
+            .map {
+                val file = FileUtil.saveFile(savePath, it)
+                file.path
+            }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(object : Observer<String> {
+                override fun onComplete() {
                 }
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(object : Observer<String> {
-                    override fun onComplete() {
-                    }
 
-                    override fun onSubscribe(d: Disposable) {
-                    }
+                override fun onSubscribe(d: Disposable) {
+                }
 
-                    override fun onNext(t: String) {
-                        callback.onSucceed(t)
-                    }
+                override fun onNext(t: String) {
+                    callback.onSucceed(t)
+                }
 
-                    override fun onError(e: Throwable) {
-                        callback.onFailed(e)
-                    }
-                })
+                override fun onError(e: Throwable) {
+                    callback.onFailed(e)
+                }
+            })
     }
 
-    override fun uploadFile( url: String, uploadFileMap: Map<String, File>, params: Map<String, String>, callback: ICallback, uploadListener: UploadListener?) {
+    override fun uploadFile(
+        url: String,
+        uploadFileMap: Map<String, File>,
+        params: Map<String, String>,
+        callback: ICallback,
+        uploadListener: UploadListener?
+    ) {
         val builder = MultipartBody.Builder().setType(MultipartBody.FORM)
         for (uploadFileEntry in uploadFileMap.entries) {
 //            val fileBody = uploadFileEntry.value.asRequestBody("multipart/form-data".toMediaTypeOrNull())
             val fileBody = DownloadProgressRequestBody(uploadFileEntry.value, "multipart/form-data",
-                    DownloadProgressRequestBody.UploadCallbacks { totalSize, uploadedSize ->
-                        uploadListener?.onProgress(totalSize, uploadedSize)
-                    })
+                DownloadProgressRequestBody.UploadCallbacks { totalSize, uploadedSize ->
+                    uploadListener?.onProgress(totalSize, uploadedSize)
+                })
             builder.addFormDataPart(uploadFileEntry.key, uploadFileEntry.value.name, fileBody)
             for (paramsEntry in params.entries) {
                 builder.addFormDataPart(paramsEntry.key, paramsEntry.value)
@@ -113,23 +157,23 @@ class RetrofitProcessor : INetProcessor {
             val parts = builder.build().parts
             val splitUrlArr = UrlUtil.splitUrl(url)
             ApiService(splitUrlArr[0]).iApiService.uploadFile(splitUrlArr[1], parts)
-                    .subscribeOn(Schedulers.io())
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .subscribe(object : Observer<Response<ResponseBody>> {
-                        override fun onComplete() {
-                        }
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(object : Observer<Response<ResponseBody>> {
+                    override fun onComplete() {
+                    }
 
-                        override fun onSubscribe(d: Disposable) {
-                        }
+                    override fun onSubscribe(d: Disposable) {
+                    }
 
-                        override fun onNext(t: Response<ResponseBody>) {
-                            callback.onSucceed(t.body()?.string() ?: "")
-                        }
+                    override fun onNext(t: Response<ResponseBody>) {
+                        callback.onSucceed(t.body()?.string() ?: "")
+                    }
 
-                        override fun onError(e: Throwable) {
-                            callback.onFailed(e)
-                        }
-                    })
+                    override fun onError(e: Throwable) {
+                        callback.onFailed(e)
+                    }
+                })
         }
 
     }

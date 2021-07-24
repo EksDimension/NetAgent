@@ -9,11 +9,29 @@ import java.io.File
 interface INetProcessor {
     fun post(url: String, params: Map<String, Any>, callback: ICallback)
 
-    fun get(url: String, params: Map<String, Any>, callback: ICallback)
+    fun get(url: String, params: Map<String, String>, callback: ICallback)
 
-    fun downloadFile(url: String, savePath: String, callback: ICallback, downloadListener: DownloadListener?)
+    fun get(
+        url: String,
+        params: Map<String, String>?,
+        headers: Map<String, String>?,
+        callback: ICallback
+    )
 
-    fun uploadFile(url: String, uploadFileMap: Map<String, File>, params: Map<String, String>, callback: ICallback, uploadListener: UploadListener?)
+    fun downloadFile(
+        url: String,
+        savePath: String,
+        callback: ICallback,
+        downloadListener: DownloadListener?
+    )
+
+    fun uploadFile(
+        url: String,
+        uploadFileMap: Map<String, File>,
+        params: Map<String, String>,
+        callback: ICallback,
+        uploadListener: UploadListener?
+    )
 
     fun setHeaders(headers: HashMap<String, String>)
 
