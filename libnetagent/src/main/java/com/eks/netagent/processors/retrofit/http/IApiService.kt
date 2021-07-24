@@ -17,13 +17,22 @@ interface IApiService {
     ): Observable<Response<ResponseBody>>
 
     @GET
-    fun get(
+    fun get(@Url url: String): Observable<Response<ResponseBody>>
+
+    @GET
+    fun getWithQueryMap(
         @Url url: String,
         @QueryMap params: Map<String, String>
     ): Observable<Response<ResponseBody>>
 
     @GET
-    fun get(
+    fun getWithHeaderMap(
+        @Url url: String,
+        @HeaderMap header: Map<String, String>
+    ): Observable<Response<ResponseBody>>
+
+    @GET
+    fun getWithQueryHeaderMaps(
         @Url url: String,
         @QueryMap params: Map<String, String>,
         @HeaderMap header: Map<String, String>

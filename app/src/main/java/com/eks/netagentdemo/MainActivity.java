@@ -55,12 +55,45 @@ public class MainActivity extends PermissionActivity {
 
     }
 
+    public void get(View view) {
+        String url = "https://apis.juhe.cn/obdcode/query";
+        NetAgent.INSTANCE.get(url, null, null, new NetCallbackImpl<BeanObdCodeQuery>() {
+            @Override
+            public void onFailed(@NotNull String errMsg) {
+                Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onSucceed(BeanObdCodeQuery objResult) {
+                Toast.makeText(MainActivity.this, objResult.toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
     public void getWithQueryMap(View view) {
         String url = "https://apis.juhe.cn/obdcode/query";
         HashMap<String, String> params = new HashMap<>();
         params.put("code", "P2079");
         params.put("key", "66010dabd6cfc61e55c07f68606e91c2");
-        NetAgent.INSTANCE.get(url, params, new NetCallbackImpl<BeanObdCodeQuery>() {
+        NetAgent.INSTANCE.get(url, params, null, new NetCallbackImpl<BeanObdCodeQuery>() {
+            @Override
+            public void onFailed(@NotNull String errMsg) {
+                Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onSucceed(BeanObdCodeQuery objResult) {
+                Toast.makeText(MainActivity.this, objResult.toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void btnGetWithHeaderMap(View view) {
+        String url = "https://apis.juhe.cn/obdcode/query";
+        HashMap<String, String> header = new HashMap<>();
+        header.put("header4", "DDD");
+        header.put("header5", "EEE");
+        NetAgent.INSTANCE.get(url, null, header, new NetCallbackImpl<BeanObdCodeQuery>() {
             @Override
             public void onFailed(@NotNull String errMsg) {
                 Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_SHORT).show();
@@ -201,6 +234,4 @@ public class MainActivity extends PermissionActivity {
         }
         return null;
     }
-
-
 }

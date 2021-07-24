@@ -10,6 +10,7 @@ import com.eks.netagent.processors.retrofit.responsebody.DownloadProgressRequest
 import com.eks.netagent.processors.retrofit.responsebody.ProgressResponseBody
 import com.eks.netagent.utils.FileUtil
 import com.eks.netagent.utils.UrlUtil
+import io.reactivex.Observable
 import io.reactivex.Observer
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.Disposable
@@ -46,10 +47,36 @@ class RetrofitProcessor : INetProcessor {
             })
     }
 
-    override fun get(url: String, params: Map<String, String>, callback: ICallback) {
+    override fun get(
+        url: String,
+        params: Map<String, String>?,
+        headers: Map<String, String>?,
+        callback: ICallback
+    ) {
         val splitUrlArr = UrlUtil.splitUrl(url)
-        ApiService(splitUrlArr[0]).iApiService.get(splitUrlArr[1], params)
-            .subscribeOn(Schedulers.io())
+        val observable: Observable<Response<ResponseBody>>
+        if (params != null && headers != null) {
+            observable = ApiService(splitUrlArr[0]).iApiService.getWithQueryHeaderMaps(
+                splitUrlArr[1],
+                params,
+                headers
+            )
+        } else if (params != null && headers == null) {
+            observable = ApiService(splitUrlArr[0]).iApiService.getWithQueryMap(
+                splitUrlArr[1],
+                params
+            )
+        } else if (params == null && headers != null) {
+            observable = ApiService(splitUrlArr[0]).iApiService.getWithHeaderMap(
+                splitUrlArr[1],
+                headers
+            )
+        } else {
+            observable = ApiService(splitUrlArr[0]).iApiService.get(
+                splitUrlArr[1]
+            )
+        }
+        observable.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(object : Observer<Response<ResponseBody>> {
                 override fun onComplete() {
@@ -66,39 +93,6 @@ class RetrofitProcessor : INetProcessor {
                     callback.onFailed(e)
                 }
             })
-    }
-
-    override fun get(
-        url: String,
-        params: Map<String, String>?,
-        headers: Map<String, String>?,
-        callback: ICallback
-    ) {
-        val splitUrlArr = UrlUtil.splitUrl(url)
-        if (params != null && headers != null) {
-            ApiService(splitUrlArr[0]).iApiService.get(
-                splitUrlArr[1],
-                params,
-                headers
-            )
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(object : Observer<Response<ResponseBody>> {
-                    override fun onComplete() {
-                    }
-
-                    override fun onSubscribe(d: Disposable) {
-                    }
-
-                    override fun onNext(t: Response<ResponseBody>) {
-                        callback.onSucceed(t.body()?.string() ?: "")
-                    }
-
-                    override fun onError(e: Throwable) {
-                        callback.onFailed(e)
-                    }
-                })
-        }
     }
 
     override fun downloadFile(

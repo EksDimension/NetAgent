@@ -21,10 +21,6 @@ object NetAgent : INetProcessor {
         mINetProcessor?.post(url, params, callback)
     }
 
-    override fun get(url: String, params: Map<String, String>, callback: ICallback) {
-        mINetProcessor?.get(url, params, callback)
-    }
-
     override fun get(
         url: String,
         params: Map<String, String>?,
