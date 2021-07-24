@@ -31,12 +31,13 @@
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed" />
+
     <Button
-        android:id="@+id/btnGetWithHeaderMap"
+        android:id="@+id/getWithHeaderMap"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="btnGetWithHeaderMap"
-        android:text="btnGetWithHeaderMap"
+        android:onClick="getWithHeaderMap"
+        android:text="getWithHeaderMap"
         app:layout_constraintBottom_toTopOf="@id/btnPost"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -56,11 +57,44 @@
         app:layout_constraintVertical_chainStyle="packed" />
 
     <Button
-        android:id="@+id/btnPostWithBody"
+        android:id="@+id/post"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:onClick="postWithBody"
-        android:text="postWithBody"
+        android:onClick="post"
+        android:text="post"
+        app:layout_constraintBottom_toTopOf="@id/btnDownload"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn" />
+
+    <Button
+        android:id="@+id/postWithFieldMap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="postWithFieldMap"
+        android:text="postWithFieldMap"
+        app:layout_constraintBottom_toTopOf="@id/btnDownload"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn" />
+
+    <Button
+        android:id="@+id/postWithHeaderMap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="postWithHeaderMap"
+        android:text="postWithHeaderMap"
+        app:layout_constraintBottom_toTopOf="@id/btnDownload"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/btn" />
+
+    <Button
+        android:id="@+id/postWithFieldHeaderMap"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="postWithFieldHeaderMap"
+        android:text="postWithFieldHeaderMap"
         app:layout_constraintBottom_toTopOf="@id/btnDownload"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"

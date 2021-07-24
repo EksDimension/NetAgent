@@ -35,12 +35,31 @@ interface IApiService {
     ): Observable<Response<ResponseBody>>
 
     @POST("{path}")
-    fun post(@Path("path") path: String): Observable<Response<ResponseBody>>
-
-    @POST("{path}")
     fun postWithBody(
         @Path("path") path: String,
         @Body body: RequestBody
+    ): Observable<Response<ResponseBody>>
+
+    @POST("{path}")
+    fun postWithBodyHeaderMaps(
+        @Path("path") path: String,
+        @Body body: RequestBody,
+        @HeaderMap header: Map<String, String>
+    ): Observable<Response<ResponseBody>>
+
+    @FormUrlEncoded
+    @POST("{path}")
+    fun postWithFieldMap(
+        @Path("path") path: String,
+        @FieldMap fieldMap: Map<String, String>
+    ): Observable<Response<ResponseBody>>
+
+    @FormUrlEncoded
+    @POST("{path}")
+    fun postWithFieldHeaderMaps(
+        @Path("path") path: String,
+        @FieldMap fieldMap: Map<String, String>,
+        @HeaderMap header: Map<String, String>
     ): Observable<Response<ResponseBody>>
 
     @POST("{path}")
@@ -50,11 +69,7 @@ interface IApiService {
     ): Observable<Response<ResponseBody>>
 
     @POST("{path}")
-    fun postWithBodyHeaderMaps(
-        @Path("path") path: String,
-        @Body body: RequestBody,
-        @HeaderMap header: Map<String, String>
-    ): Observable<Response<ResponseBody>>
+    fun post(@Path("path") path: String): Observable<Response<ResponseBody>>
 
     @Multipart
     @POST

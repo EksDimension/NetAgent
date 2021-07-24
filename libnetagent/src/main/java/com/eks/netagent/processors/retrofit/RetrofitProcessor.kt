@@ -15,6 +15,7 @@ import io.reactivex.schedulers.Schedulers
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.ResponseBody
 import org.json.JSONObject
 import retrofit2.Response
@@ -73,20 +74,9 @@ class RetrofitProcessor : INetProcessor {
             }
         } else if (requestType == RequestType.POST) {
             observable = if (params != null && headers != null) {
-                generatePostBody(params).let { requestBody ->
-                    ApiService(baseUrl).iApiService.postWithBodyHeaderMaps(
-                        url,
-                        requestBody,
-                        headers
-                    )
-                }
+                ApiService(baseUrl).iApiService.postWithFieldHeaderMaps(url, params, headers)
             } else if (params != null && headers == null) {
-                generatePostBody(params).let { requestBody ->
-                    ApiService(baseUrl).iApiService.postWithBody(
-                        url,
-                        requestBody,
-                    )
-                }
+                ApiService(baseUrl).iApiService.postWithFieldMap(url, params)
             } else if (params == null && headers != null) {
                 ApiService(baseUrl).iApiService.postWithHeaderMap(url, headers)
             } else {
@@ -114,6 +104,7 @@ class RetrofitProcessor : INetProcessor {
         }
     }
 
+    @Suppress("unused")
     private fun generatePostBody(params: Map<String, String>): RequestBody {
         val paramString = JSONObject(params).toString()
             .replace("\"{", "{")
@@ -121,9 +112,8 @@ class RetrofitProcessor : INetProcessor {
             .replace("\\\"", "\"")
             .replace("\"[", "[")
             .replace("]\"", "]")
-        return RequestBody.create(
-            "application/json;charset=utf-8".toMediaTypeOrNull(), paramString
-        )
+        return paramString
+            .toRequestBody("application/json;charset=utf-8".toMediaTypeOrNull())
     }
 
     override fun downloadFile(
@@ -171,10 +161,10 @@ class RetrofitProcessor : INetProcessor {
         val builder = MultipartBody.Builder().setType(MultipartBody.FORM)
         for (uploadFileEntry in uploadFileMap.entries) {
 //            val fileBody = uploadFileEntry.value.asRequestBody("multipart/form-data".toMediaTypeOrNull())
-            val fileBody = DownloadProgressRequestBody(uploadFileEntry.value, "multipart/form-data",
-                DownloadProgressRequestBody.UploadCallbacks { totalSize, uploadedSize ->
-                    uploadListener?.onProgress(totalSize, uploadedSize)
-                })
+            val fileBody = DownloadProgressRequestBody(uploadFileEntry.value, "multipart/form-data"
+            ) { totalSize, uploadedSize ->
+                uploadListener?.onProgress(totalSize, uploadedSize)
+            }
             builder.addFormDataPart(uploadFileEntry.key, uploadFileEntry.value.name, fileBody)
             for (paramsEntry in params.entries) {
                 builder.addFormDataPart(paramsEntry.key, paramsEntry.value)

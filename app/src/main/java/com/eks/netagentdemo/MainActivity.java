@@ -90,7 +90,7 @@ public class MainActivity extends PermissionActivity {
         });
     }
 
-    public void btnGetWithHeaderMap(View view) {
+    public void getWithHeaderMap(View view) {
         String url = "obdcode/query";
         HashMap<String, String> header = new HashMap<>();
         header.put("header4", "DDD");
@@ -129,12 +129,66 @@ public class MainActivity extends PermissionActivity {
         });
     }
 
-    public void postWithBody(View view) {
+    public void post(View view) {
+        String url = "toutiao/index";
+        NetAgent.INSTANCE.request(RequestType.POST, "https://v.juhe.cn", url, null, null, new NetCallbackImpl<BeanToutiao>() {
+            @Override
+            public void onFailed(@NotNull String errMsg) {
+                Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onSucceed(BeanToutiao objResult) {
+                Toast.makeText(MainActivity.this, objResult.toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void postWithFieldMap(View view) {
         String url = "toutiao/index";
         HashMap<String, String> params = new HashMap<>();
         params.put("type", "shehui");
         params.put("key", "1883b1aa57644c2b775c608520f6cb2a");
         NetAgent.INSTANCE.request(RequestType.POST, "https://v.juhe.cn", url, params, null, new NetCallbackImpl<BeanToutiao>() {
+            @Override
+            public void onFailed(@NotNull String errMsg) {
+                Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onSucceed(BeanToutiao objResult) {
+                Toast.makeText(MainActivity.this, objResult.toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void postWithHeaderMap(View view) {
+        String url = "toutiao/index";
+        HashMap<String, String> header = new HashMap<>();
+        header.put("header4", "DDD");
+        header.put("header5", "EEE");
+        NetAgent.INSTANCE.request(RequestType.POST, "https://v.juhe.cn", url, null, header, new NetCallbackImpl<BeanToutiao>() {
+            @Override
+            public void onFailed(@NotNull String errMsg) {
+                Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onSucceed(BeanToutiao objResult) {
+                Toast.makeText(MainActivity.this, objResult.toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
+    public void postWithFieldHeaderMap(View view) {
+        String url = "toutiao/index";
+        HashMap<String, String> params = new HashMap<>();
+        params.put("type", "shehui");
+        params.put("key", "1883b1aa57644c2b775c608520f6cb2a");
+        HashMap<String, String> header = new HashMap<>();
+        header.put("header4", "DDD");
+        header.put("header5", "EEE");
+        NetAgent.INSTANCE.request(RequestType.POST, "https://v.juhe.cn", url, params, header, new NetCallbackImpl<BeanToutiao>() {
             @Override
             public void onFailed(@NotNull String errMsg) {
                 Toast.makeText(MainActivity.this, errMsg, Toast.LENGTH_SHORT).show();
@@ -236,4 +290,5 @@ public class MainActivity extends PermissionActivity {
         }
         return null;
     }
+
 }
