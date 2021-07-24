@@ -2,7 +2,9 @@ package com.eks.netagentdemo;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -255,19 +257,24 @@ public class MainActivity extends PermissionActivity {
      * 获取项目根目录
      */
     public File getProjectMainFolder() {
-        if (getSdcardPath() == null) {
-            return null;
-        } else {
-            File f = new File(getSdcardPath() + "/" + "netAgent");
-            if (!f.exists()) {
-                /* 创建strRingtoneFolder文件夹 */
-                if (f.mkdirs()) {
-                    return f;
-                } else {
-                    return null;
-                }
+        if(Build.VERSION.SDK_INT >=Build.VERSION_CODES.Q){
+            File s = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+            return s;
+        }else{
+            if (getSdcardPath() == null) {
+                return null;
             } else {
-                return f;
+                File f = new File(getSdcardPath() + "/" + "netAgent");
+                if (!f.exists()) {
+                    /* 创建strRingtoneFolder文件夹 */
+                    if (f.mkdirs()) {
+                        return f;
+                    } else {
+                        return null;
+                    }
+                } else {
+                    return f;
+                }
             }
         }
     }
