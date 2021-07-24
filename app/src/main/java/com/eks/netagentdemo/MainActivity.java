@@ -33,6 +33,12 @@ public class MainActivity extends PermissionActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        HashMap<String, String> headers = new HashMap<String, String>();
+        headers.put("11111111", "AAA");
+        headers.put("333", "CCC");
+        NetAgent.INSTANCE.setHeaders(headers);
+        NetAgent.INSTANCE.addHeader("5555", "EEE");
+        NetAgent.INSTANCE.removeHeader("333");
         btnDownload = findViewById(R.id.btnDownload);
         btnUpload = findViewById(R.id.btnUpload);
         requestRuntimePermission(permissionArray, new PermissionListener() {
@@ -50,12 +56,6 @@ public class MainActivity extends PermissionActivity {
     }
 
     public void get(View view) {
-        HashMap<String, String> headers = new HashMap<String, String>();
-        headers.put("11111111", "222222222222");
-        headers.put("333", "444444444");
-        NetAgent.INSTANCE.setHeaders(headers);
-        NetAgent.INSTANCE.addHeader("5555", "666666666666");
-        NetAgent.INSTANCE.removeHeader("333");
         String url = "https://apis.juhe.cn/obdcode/query";
         HashMap<String, Object> params = new HashMap<>();
         params.put("code", "P2079");
