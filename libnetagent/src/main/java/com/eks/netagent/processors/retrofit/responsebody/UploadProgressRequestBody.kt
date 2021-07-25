@@ -1,84 +1,92 @@
-package com.eks.netagent.processors.retrofit.responsebody;
+package com.eks.netagent.processors.retrofit.responsebody
 
-import android.os.Handler;
-import android.os.Looper;
-
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-
-import okhttp3.MediaType;
-import okhttp3.RequestBody;
-import okio.BufferedSink;
+import android.os.Handler
+import android.os.Looper
+import okhttp3.MediaType
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.RequestBody
+import okio.BufferedSink
+import java.io.File
+import java.io.FileInputStream
+import java.io.IOException
 
 /**
  * Created by Riggs on 2020/3/5
  */
-public class UploadProgressRequestBody extends RequestBody {
-    private File mFile;
-    private String mPath;
-    private String mMediaType;
-    private UploadCallbacks mListener;
+class UploadProgressRequestBody : RequestBody {
+    private var mFile: File
 
-    private int mEachBufferSize = 1024;
+    @Suppress("unused")
+    private val mPath: String? = null
+    private var mMediaType: String
+    private var mListener: UploadCallbacks
+    private var mEachBufferSize = 1024
+    private var lastReadTime: Long = 0
 
-    public UploadProgressRequestBody(final File file, String mediaType, final UploadCallbacks listener) {
-        mFile = file;
-        mMediaType = mediaType;
-        mListener = listener;
+    constructor(file: File, mediaType: String, listener: UploadCallbacks) {
+        mFile = file
+        mMediaType = mediaType
+        mListener = listener
+        lastReadTime = 0L
     }
 
-    public UploadProgressRequestBody(final File file, String mediaType, int eachBufferSize, final UploadCallbacks listener) {
-        mFile = file;
-        mMediaType = mediaType;
-        mEachBufferSize = eachBufferSize;
-        mListener = listener;
+    @Suppress("unused")
+    constructor(file: File, mediaType: String, eachBufferSize: Int, listener: UploadCallbacks) {
+        mFile = file
+        mMediaType = mediaType
+        mEachBufferSize = eachBufferSize
+        mListener = listener
     }
 
-    @Override
-    public MediaType contentType() {
+    override fun contentType(): MediaType? {
         // i want to upload only images
-        return MediaType.parse(mMediaType);
+        return mMediaType.toMediaTypeOrNull()
     }
 
-    @Override
-    public void writeTo(BufferedSink sink) throws IOException {
-        long fileLength = mFile.length();
-        byte[] buffer = new byte[mEachBufferSize];
-        FileInputStream in = new FileInputStream(mFile);
-        long uploaded = 0;
-
-        try {
-            int read;
-            Handler handler = new Handler(Looper.getMainLooper());
-            while ((read = in.read(buffer)) != -1) {
+    @Throws(IOException::class)
+    override fun writeTo(sink: BufferedSink) {
+        val fileLength = mFile.length()
+        val buffer = ByteArray(mEachBufferSize)
+        val `in` = FileInputStream(mFile)
+        var uploaded: Long = 0
+        `in`.use { inStream ->
+            var read: Int
+            val handler = Handler(Looper.getMainLooper())
+            while (inStream.read(buffer).also { read = it } != -1) {
                 // update progress on UI thread
-                handler.post(new ProgressUpdater(uploaded, fileLength));
-                uploaded += read;
-                sink.write(buffer, 0, read);
-
+                handler.post(ProgressUpdater(uploaded, fileLength))
+                uploaded += read.toLong()
+                sink.write(buffer, 0, read)
             }
-        } finally {
-            in.close();
         }
     }
 
-    private class ProgressUpdater implements Runnable {
-        private long mUploaded;
-        private long mTotal;
-
-        public ProgressUpdater(long uploaded, long total) {
-            mUploaded = uploaded;
-            mTotal = total;
-        }
-
-        @Override
-        public void run() {
-            mListener.onProgressUpdate(mTotal, mUploaded);
+    private inner class ProgressUpdater(private val mUploaded: Long, private val mTotal: Long) :
+        Runnable {
+        override fun run() {
+            val currentTime = System.currentTimeMillis()
+            when {
+                lastReadTime == 0L -> {
+                    lastReadTime = currentTime
+                    mListener.onProgressUpdate(mTotal, mUploaded)
+                }
+                currentTime - lastReadTime > TIME_GAP_TO_READ -> {
+                    lastReadTime = currentTime
+                    mListener.onProgressUpdate(mTotal, mUploaded)
+                }
+                mTotal == mUploaded -> {
+                    lastReadTime = currentTime
+                    mListener.onProgressUpdate(mTotal, mUploaded)
+                }
+            }
         }
     }
 
-    public interface UploadCallbacks {
-        void onProgressUpdate(long totalSize, long uploadedSize);
+    interface UploadCallbacks {
+        fun onProgressUpdate(totalSize: Long, uploadedSize: Long)
+    }
+
+    companion object {
+        private const val TIME_GAP_TO_READ: Long = 16
     }
 }

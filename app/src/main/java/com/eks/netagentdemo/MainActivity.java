@@ -259,7 +259,7 @@ public class MainActivity extends PermissionActivity {
 
     public void upload(View view) {
         resultTextView.setText("");
-        String filePath = getProjectMainFolder() + "/navicat111_premium_cs_x86.exe";
+        String filePath = getProjectMainFolder() + "/navicat111_premium_cs_x64.exe";
         HashMap<String, File> uploadFileMap = new HashMap<>();
         uploadFileMap.put("myFile", new File(filePath));
         HashMap<String, String> params = new HashMap<>();

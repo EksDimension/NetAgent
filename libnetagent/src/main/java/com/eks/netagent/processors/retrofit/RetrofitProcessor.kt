@@ -7,10 +7,6 @@ import com.eks.netagent.processors.retrofit.responsebody.UploadProgressRequestBo
 import com.eks.netagent.processors.retrofit.responsebody.ProgressResponseBody
 import com.eks.netagent.utils.FileUtil
 import com.eks.netagent.utils.UrlUtil
-import io.reactivex.Observer
-import io.reactivex.android.schedulers.AndroidSchedulers
-import io.reactivex.disposables.Disposable
-import io.reactivex.schedulers.Schedulers
 import kotlinx.coroutines.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
@@ -66,7 +62,7 @@ class RetrofitProcessor : INetProcessor {
                 if (baseUrl == null || baseUrl.isEmpty()) return@Scope
                 val response: Response<ResponseBody> =
                     processRequest(requestType, params, headers, baseUrl, url)
-                val responseString = processRequestResponse(response)
+                val responseString = processResponse(response)
                 callback.onSucceed(responseString)
             } catch (e: Exception) {
                 callback.onFailed(e)
@@ -110,24 +106,6 @@ class RetrofitProcessor : INetProcessor {
         }
     }
 
-    private suspend fun processRequestResponse(response: Response<ResponseBody>): String {
-        return withContext(Dispatchers.IO) {
-            response.body()?.string() ?: ""
-        }
-    }
-
-    @Suppress("unused")
-    private fun generatePostBody(params: Map<String, String>): RequestBody {
-        val paramString = JSONObject(params).toString()
-            .replace("\"{", "{")
-            .replace("}\"", "}")
-            .replace("\\\"", "\"")
-            .replace("\"[", "[")
-            .replace("]\"", "]")
-        return paramString
-            .toRequestBody("application/json;charset=utf-8".toMediaTypeOrNull())
-    }
-
     override fun downloadFile(
         url: String,
         savePath: String,
@@ -158,6 +136,60 @@ class RetrofitProcessor : INetProcessor {
         }
     }
 
+    override fun uploadFile(
+        url: String,
+        uploadFileMap: Map<String, File>,
+        params: Map<String, String>,
+        callback: ICallback,
+        uploadListener: UploadListener?
+    ) {
+        GlobalScope.launch(Dispatchers.Main) Scope@{
+            val builder = MultipartBody.Builder().setType(MultipartBody.FORM)
+            for (uploadFileEntry in uploadFileMap.entries) {
+                val fileBody =
+                    UploadProgressRequestBody(uploadFileEntry.value, "multipart/form-data", object :
+                        UploadProgressRequestBody.UploadCallbacks {
+                        override fun onProgressUpdate(totalSize: Long, uploadedSize: Long) {
+                            uploadListener?.onProgress(totalSize, uploadedSize)
+                        }
+                    })
+                builder.addFormDataPart(uploadFileEntry.key, uploadFileEntry.value.name, fileBody)
+                for (paramsEntry in params.entries) {
+                    builder.addFormDataPart(paramsEntry.key, paramsEntry.value)
+                }
+                val parts = builder.build().parts
+                val splitUrlArr = UrlUtil.splitUrl(url)
+                try {
+                    val response: Response<ResponseBody> = withContext(Dispatchers.IO) {
+                        ApiService(splitUrlArr[0]).iApiService.uploadFile(splitUrlArr[1], parts)
+                    }
+                    val responseString = processResponse(response)
+                    callback.onSucceed(responseString)
+                } catch (e: Exception) {
+                    callback.onFailed(e)
+                }
+            }
+        }
+    }
+
+    @Suppress("unused")
+    private fun generatePostBody(params: Map<String, String>): RequestBody {
+        val paramString = JSONObject(params).toString()
+            .replace("\"{", "{")
+            .replace("}\"", "}")
+            .replace("\\\"", "\"")
+            .replace("\"[", "[")
+            .replace("]\"", "]")
+        return paramString
+            .toRequestBody("application/json;charset=utf-8".toMediaTypeOrNull())
+    }
+
+    private suspend fun processResponse(response: Response<ResponseBody>): String {
+        return withContext(Dispatchers.IO) {
+            response.body()?.string() ?: ""
+        }
+    }
+
     private suspend fun processDownloadResponse(
         response: Response<ResponseBody>,
         savePath: String
@@ -172,48 +204,4 @@ class RetrofitProcessor : INetProcessor {
             }
         }
     }
-
-    override fun uploadFile(
-        url: String,
-        uploadFileMap: Map<String, File>,
-        params: Map<String, String>,
-        callback: ICallback,
-        uploadListener: UploadListener?
-    ) {
-        val builder = MultipartBody.Builder().setType(MultipartBody.FORM)
-        for (uploadFileEntry in uploadFileMap.entries) {
-            val fileBody =
-                UploadProgressRequestBody(
-                    uploadFileEntry.value, "multipart/form-data"
-                ) { totalSize, uploadedSize ->
-                    uploadListener?.onProgress(totalSize, uploadedSize)
-                }
-            builder.addFormDataPart(uploadFileEntry.key, uploadFileEntry.value.name, fileBody)
-            for (paramsEntry in params.entries) {
-                builder.addFormDataPart(paramsEntry.key, paramsEntry.value)
-            }
-            val parts = builder.build().parts
-            val splitUrlArr = UrlUtil.splitUrl(url)
-            ApiService(splitUrlArr[0]).iApiService.uploadFile(splitUrlArr[1], parts)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(object : Observer<Response<ResponseBody>> {
-                    override fun onComplete() {
-                    }
-
-                    override fun onSubscribe(d: Disposable) {
-                    }
-
-                    override fun onNext(t: Response<ResponseBody>) {
-                        callback.onSucceed(t.body()?.string() ?: "")
-                    }
-
-                    override fun onError(e: Throwable) {
-                        callback.onFailed(e)
-                    }
-                })
-        }
-
-    }
-
 }

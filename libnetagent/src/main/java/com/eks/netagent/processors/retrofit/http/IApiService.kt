@@ -14,36 +14,36 @@ import retrofit2.http.*
 interface IApiService {
 
     @GET("{path}")
-    suspend fun get(@Path("path") path: String): Response<ResponseBody>
+    suspend fun get(@Path("path") url: String): Response<ResponseBody>
 
     @GET("{path}")
     suspend fun getWithQueryMap(
-        @Path("path") path: String,
+        @Path("path") url: String,
         @QueryMap params: Map<String, String>
     ): Response<ResponseBody>
 
     @GET("{path}")
     suspend fun getWithHeaderMap(
-        @Path("path") path: String,
+        @Path("path") url: String,
         @HeaderMap header: Map<String, String>
     ): Response<ResponseBody>
 
     @GET("{path}")
     suspend fun getWithQueryHeaderMaps(
-        @Path("path") path: String,
+        @Path("path") url: String,
         @QueryMap params: Map<String, String>,
         @HeaderMap header: Map<String, String>
     ): Response<ResponseBody>
 
     @POST("{path}")
     suspend fun postWithBody(
-        @Path("path") path: String,
+        @Path("path") url: String,
         @Body body: RequestBody
     ): Response<ResponseBody>
 
     @POST("{path}")
     suspend fun postWithBodyHeaderMaps(
-        @Path("path") path: String,
+        @Path("path") url: String,
         @Body body: RequestBody,
         @HeaderMap header: Map<String, String>
     ): Response<ResponseBody>
@@ -51,33 +51,33 @@ interface IApiService {
     @FormUrlEncoded
     @POST("{path}")
     suspend fun postWithFieldMap(
-        @Path("path") path: String,
+        @Path("path") url: String,
         @FieldMap fieldMap: Map<String, String>
     ): Response<ResponseBody>
 
     @FormUrlEncoded
     @POST("{path}")
     suspend fun postWithFieldHeaderMaps(
-        @Path("path") path: String,
+        @Path("path") url: String,
         @FieldMap fieldMap: Map<String, String>,
         @HeaderMap header: Map<String, String>
     ): Response<ResponseBody>
 
     @POST("{path}")
     suspend fun postWithHeaderMap(
-        @Path("path") path: String,
+        @Path("path") url: String,
         @HeaderMap header: Map<String, String>
     ): Response<ResponseBody>
 
     @POST("{path}")
-    suspend fun post(@Path("path") path: String): Response<ResponseBody>
+    suspend fun post(@Path("path") url: String): Response<ResponseBody>
 
     @Multipart
     @POST
-    fun uploadFile(
+    suspend fun uploadFile(
         @Url url: String,
         @Part partList: List<MultipartBody.Part>
-    ): Observable<Response<ResponseBody>>
+    ): Response<ResponseBody>
 
     @Streaming
     @GET
