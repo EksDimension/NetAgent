@@ -8,6 +8,7 @@ import java.net.URLEncoder
  */
 class UrlUtil {
     companion object {
+        @Suppress("unused")
         fun appendParams(baseUrl: String, url: String, params: Map<String, Any>?): String {
             if (params == null || params.isEmpty()) {
                 return url

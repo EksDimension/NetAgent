@@ -1,78 +1,67 @@
-package com.eks.netagent.processors.retrofit.responsebody;
+package com.eks.netagent.processors.retrofit.responsebody
 
-import java.io.IOException;
-
-import io.reactivex.annotations.Nullable;
-import okhttp3.MediaType;
-import okhttp3.ResponseBody;
-import okio.Buffer;
-import okio.BufferedSource;
-import okio.ForwardingSource;
-import okio.Okio;
-import okio.Source;
+import okhttp3.MediaType
+import okhttp3.ResponseBody
+import okio.*
+import java.io.IOException
 
 /**
  * Created by Riggs on 12/19/2019
  */
-public class ProgressResponseBody extends ResponseBody {
-    private ResponseBody responseBody;
-    private BufferedSource bufferedSource;
-    private ProgressListener progressListener;
-    private long lastReadTime;
-
-    private static long TIME_GAP_TO_READ = 16;
-
-    public ProgressResponseBody(ResponseBody responseBody, ProgressListener progressListener) {
-        this.responseBody = responseBody;
-        this.progressListener = progressListener;
+class ProgressResponseBody(
+    private val responseBody: ResponseBody,
+    private val progressListener: ProgressListener
+) : ResponseBody() {
+    private var bufferedSource: BufferedSource? = null
+    private var lastReadTime: Long = 0
+    override fun contentType(): MediaType? {
+        return responseBody.contentType()
     }
 
-
-    @Nullable
-    @Override
-    public MediaType contentType() {
-        return responseBody.contentType();
+    override fun contentLength(): Long {
+        return responseBody.contentLength()
     }
 
-    @Override
-    public long contentLength() {
-        return responseBody.contentLength();
-    }
-
-    @Override
-    public BufferedSource source() {
-        lastReadTime = 0L;
+    override fun source(): BufferedSource {
+        lastReadTime = 0L
         if (bufferedSource == null) {
-            bufferedSource = Okio.buffer(source(responseBody.source()));
+            bufferedSource = source(responseBody.source()).buffer()
         }
-        return bufferedSource;
+        return bufferedSource as BufferedSource
     }
 
-    private Source source(Source source) {
-        return new ForwardingSource(source) {
-            long totalBytesRead = 0L;
-
-            @Override
-            public long read(Buffer sink, long byteCount) throws IOException {
-                long bytesRead = super.read(sink, byteCount);
-                totalBytesRead += bytesRead;
-                long currentTime = System.currentTimeMillis();
-                if (lastReadTime == 0) {
-                    lastReadTime = currentTime;
-                    progressListener.onProgress(responseBody.contentLength(), totalBytesRead);
-                } else if (currentTime - lastReadTime > TIME_GAP_TO_READ) {
-                    lastReadTime = currentTime;
-                    progressListener.onProgress(responseBody.contentLength(), totalBytesRead);
-                } else if(responseBody.contentLength() == totalBytesRead){
-                    lastReadTime = currentTime;
-                    progressListener.onProgress(responseBody.contentLength(), totalBytesRead);
+    private fun source(source: Source): Source {
+        return object : ForwardingSource(source) {
+            var totalBytesRead = 0L
+            @Throws(IOException::class)
+            override fun read(sink: Buffer, byteCount: Long): Long {
+                val bytesRead = super.read(sink, byteCount)
+                totalBytesRead += bytesRead
+                val currentTime = System.currentTimeMillis()
+                when {
+                    lastReadTime == 0L -> {
+                        lastReadTime = currentTime
+                        progressListener.onProgress(responseBody.contentLength(), totalBytesRead)
+                    }
+                    currentTime - lastReadTime > TIME_GAP_TO_READ -> {
+                        lastReadTime = currentTime
+                        progressListener.onProgress(responseBody.contentLength(), totalBytesRead)
+                    }
+                    responseBody.contentLength() == totalBytesRead -> {
+                        lastReadTime = currentTime
+                        progressListener.onProgress(responseBody.contentLength(), totalBytesRead)
+                    }
                 }
-                return bytesRead;
+                return bytesRead
             }
-        };
+        }
     }
 
-    public interface ProgressListener {
-        void onProgress(long totalSize, long downSize);
+    interface ProgressListener {
+        fun onProgress(totalSize: Long, downSize: Long)
+    }
+
+    companion object {
+        private const val TIME_GAP_TO_READ: Long = 16
     }
 }

@@ -16,17 +16,17 @@ import java.util.concurrent.TimeUnit
  */
 object ApiServiceHelper {
     fun getApiService(
-            baseUrl: String,
-            progressListener: ProgressResponseBody.ProgressListener? = null
+        baseUrl: String,
+        progressListener: ProgressResponseBody.ProgressListener? = null
     ): IApiService {
         val httpLoggingInterceptor = HttpLoggingInterceptor()
         httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
         val mBuilder = OkHttpClient.Builder()
 //                                                .cache(cache)
 
-                .connectTimeout(10, TimeUnit.SECONDS)
-                .writeTimeout(10, TimeUnit.SECONDS)
-                .readTimeout(10, TimeUnit.SECONDS)
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .writeTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(10, TimeUnit.SECONDS)
         //如果有请求头拦截器就加入
         mBuilder.addInterceptor(defaultHeaderInterceptor)
         mBuilder.addInterceptor(httpLoggingInterceptor)
@@ -34,24 +34,33 @@ object ApiServiceHelper {
         progressListener?.let { pL ->
             mBuilder.addNetworkInterceptor { chain ->
                 val response = chain.proceed(chain.request())
-                response.newBuilder().body(ProgressResponseBody(response.body, ProgressResponseBody.ProgressListener { totalSize, downSize ->
-                    //借助rxandroid封装的
-                    AndroidSchedulers.mainThread().scheduleDirect {
-                        pL.onProgress(totalSize, downSize)
-                    }
-                })).build()
+                val responseBody = response.body
+                val progressResponseBody: ProgressResponseBody? = if (responseBody != null) {
+                    ProgressResponseBody(responseBody,
+                        object : ProgressResponseBody.ProgressListener {
+                            override fun onProgress(totalSize: Long, downSize: Long) {
+                                //借助rxandroid封装的
+                                AndroidSchedulers.mainThread().scheduleDirect {
+                                    pL.onProgress(totalSize, downSize)
+                                }
+                            }
+                        }
+                    )
+                } else {
+                    null
+                }
+                response.newBuilder().body(progressResponseBody).build()
             }
         }
         //如果没有下载拦截器 就加入日志
-        val retrofit: Retrofit
         val serviceI: IApiService
-        retrofit = Retrofit.Builder()
-                .client(mBuilder.build())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create())
-                .baseUrl(baseUrl)
-                .build()
-        serviceI = retrofit.create<IApiService>(IApiService::class.java)
+        val retrofit: Retrofit = Retrofit.Builder()
+            .client(mBuilder.build())
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create())
+            .baseUrl(baseUrl)
+            .build()
+        serviceI = retrofit.create(IApiService::class.java)
         return serviceI
     }
 

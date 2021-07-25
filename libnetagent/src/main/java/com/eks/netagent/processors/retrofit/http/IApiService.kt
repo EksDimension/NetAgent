@@ -10,6 +10,7 @@ import retrofit2.http.*
 /**
  * Created by Riggs on 12/18/2019
  */
+@Suppress("unused")
 interface IApiService {
 
     @GET("{path}")

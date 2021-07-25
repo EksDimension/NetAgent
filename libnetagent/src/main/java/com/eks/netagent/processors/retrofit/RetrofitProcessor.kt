@@ -139,8 +139,10 @@ class RetrofitProcessor : INetProcessor {
                 val splitUrlArr = UrlUtil.splitUrl(url)
                 val response: Response<ResponseBody> = withContext(Dispatchers.IO) {
                     ApiService(splitUrlArr[0], downloadListener?.let {
-                        ProgressResponseBody.ProgressListener { totalSize, downSize ->
-                            downloadListener.onProgress(totalSize, downSize)
+                        object : ProgressResponseBody.ProgressListener {
+                            override fun onProgress(totalSize: Long, downSize: Long) {
+                                downloadListener.onProgress(totalSize, downSize)
+                            }
                         }
                     }).iApiService.downloadFile(splitUrlArr[1])
                 }
