@@ -18,6 +18,9 @@ public class ProgressResponseBody extends ResponseBody {
     private ResponseBody responseBody;
     private BufferedSource bufferedSource;
     private ProgressListener progressListener;
+    private long lastReadTime;
+
+    private static long TIME_GAP_TO_READ = 16;
 
     public ProgressResponseBody(ResponseBody responseBody, ProgressListener progressListener) {
         this.responseBody = responseBody;
@@ -38,6 +41,7 @@ public class ProgressResponseBody extends ResponseBody {
 
     @Override
     public BufferedSource source() {
+        lastReadTime = 0L;
         if (bufferedSource == null) {
             bufferedSource = Okio.buffer(source(responseBody.source()));
         }
@@ -52,7 +56,17 @@ public class ProgressResponseBody extends ResponseBody {
             public long read(Buffer sink, long byteCount) throws IOException {
                 long bytesRead = super.read(sink, byteCount);
                 totalBytesRead += bytesRead;
-                progressListener.onProgress(responseBody.contentLength(), totalBytesRead);
+                long currentTime = System.currentTimeMillis();
+                if (lastReadTime == 0) {
+                    lastReadTime = currentTime;
+                    progressListener.onProgress(responseBody.contentLength(), totalBytesRead);
+                } else if (currentTime - lastReadTime > TIME_GAP_TO_READ) {
+                    lastReadTime = currentTime;
+                    progressListener.onProgress(responseBody.contentLength(), totalBytesRead);
+                } else if(responseBody.contentLength() == totalBytesRead){
+                    lastReadTime = currentTime;
+                    progressListener.onProgress(responseBody.contentLength(), totalBytesRead);
+                }
                 return bytesRead;
             }
         };

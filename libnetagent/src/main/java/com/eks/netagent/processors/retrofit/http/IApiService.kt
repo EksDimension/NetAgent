@@ -69,7 +69,7 @@ interface IApiService {
     ): Response<ResponseBody>
 
     @POST("{path}")
-    suspend  fun post(@Path("path") path: String): Response<ResponseBody>
+    suspend fun post(@Path("path") path: String): Response<ResponseBody>
 
     @Multipart
     @POST
@@ -80,5 +80,5 @@ interface IApiService {
 
     @Streaming
     @GET
-    fun downloadFile(@Url url: String): Observable<ResponseBody>
+    suspend fun downloadFile(@Url url: String): Response<ResponseBody>
 }

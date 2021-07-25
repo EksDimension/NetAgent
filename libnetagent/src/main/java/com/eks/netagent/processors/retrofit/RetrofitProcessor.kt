@@ -64,7 +64,7 @@ class RetrofitProcessor : INetProcessor {
             if (baseUrl == null || baseUrl.isEmpty()) return@Scope
             val response: Response<ResponseBody> =
                 processRequest(requestType, params, headers, baseUrl, url)
-            val responseString = processResponse(response)
+            val responseString = processRequestResponse(response)
             callback.onSucceed(responseString)
         }
     }
@@ -105,8 +105,8 @@ class RetrofitProcessor : INetProcessor {
         }
     }
 
-    private fun processResponse(response: Response<ResponseBody>): String = runBlocking {
-        return@runBlocking withContext(Dispatchers.IO) {
+    private suspend fun processRequestResponse(response: Response<ResponseBody>): String {
+        return withContext(Dispatchers.IO) {
             response.body()?.string() ?: ""
         }
     }
@@ -129,33 +129,29 @@ class RetrofitProcessor : INetProcessor {
         callback: ICallback,
         downloadListener: DownloadListener?
     ) {
-        val splitUrlArr = UrlUtil.splitUrl(url)
-        ApiService(splitUrlArr[0], downloadListener?.let {
-            ProgressResponseBody.ProgressListener { totalSize, downSize ->
-                downloadListener.onProgress(totalSize, downSize)
+        GlobalScope.launch(Dispatchers.Main) Scope@{
+            val splitUrlArr = UrlUtil.splitUrl(url)
+            val response: Response<ResponseBody> = withContext(Dispatchers.IO) {
+                ApiService(splitUrlArr[0], downloadListener?.let {
+                    ProgressResponseBody.ProgressListener { totalSize, downSize ->
+                        downloadListener.onProgress(totalSize, downSize)
+                    }
+                }).iApiService.downloadFile(splitUrlArr[1])
             }
-        }).iApiService.downloadFile(splitUrlArr[1])
-            .map {
-                val file = FileUtil.saveFile(savePath, it)
-                file.path
-            }
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(object : Observer<String> {
-                override fun onComplete() {
-                }
+            val responseString = processDownloadResponse(response, savePath)
+            callback.onSucceed(responseString)
+        }
+    }
 
-                override fun onSubscribe(d: Disposable) {
-                }
-
-                override fun onNext(t: String) {
-                    callback.onSucceed(t)
-                }
-
-                override fun onError(e: Throwable) {
-                    callback.onFailed(e)
-                }
-            })
+    private suspend fun processDownloadResponse(
+        response: Response<ResponseBody>,
+        savePath: String
+    ): String {
+        return withContext(Dispatchers.IO) {
+            val it = response.body()
+            val file = FileUtil.saveFile(savePath, it)
+            file.path
+        }
     }
 
     override fun uploadFile(
