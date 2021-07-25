@@ -41,7 +41,7 @@ object NetAgent : INetProcessor {
         callback: ICallback,
         downloadListener: DownloadListener?
     ) {
-        mINetProcessor?.downloadFile(url, savePath, callback, downloadListener)
+        mINetProcessor?.downloadFile( url, savePath, callback, downloadListener)
     }
 
     override fun uploadFile(

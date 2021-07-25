@@ -1,7 +1,10 @@
 package com.eks.netagent.processors.retrofit.http
 
 import com.eks.netagent.processors.retrofit.responsebody.ProgressResponseBody
-import io.reactivex.android.schedulers.AndroidSchedulers
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -15,53 +18,70 @@ import java.util.concurrent.TimeUnit
  * Created by Riggs on 9/10/2019
  */
 object ApiServiceHelper {
+
+    var headers = HashMap<String, String>()
+
     fun getApiService(
-            baseUrl: String,
-            progressListener: ProgressResponseBody.ProgressListener? = null
+        baseUrl: String,
+        progressListener: ProgressResponseBody.ProgressListener? = null
     ): IApiService {
         val httpLoggingInterceptor = HttpLoggingInterceptor()
         httpLoggingInterceptor.level = HttpLoggingInterceptor.Level.BODY
         val mBuilder = OkHttpClient.Builder()
-//                                                .cache(cache)
-
-                .connectTimeout(10, TimeUnit.SECONDS)
-                .writeTimeout(10, TimeUnit.SECONDS)
-                .readTimeout(10, TimeUnit.SECONDS)
-        //如果有请求头拦截器就加入
+            .connectTimeout(10, TimeUnit.SECONDS)
+            .writeTimeout(10, TimeUnit.SECONDS)
+            .readTimeout(10, TimeUnit.SECONDS)
+        // add header interceptor
         mBuilder.addInterceptor(defaultHeaderInterceptor)
+        // add logging interceptor
         mBuilder.addInterceptor(httpLoggingInterceptor)
-        //如果有下载拦截器就加入
-        progressListener?.let { pL ->
-            mBuilder.addNetworkInterceptor { chain ->
-                val response = chain.proceed(chain.request())
-                response.newBuilder().body(ProgressResponseBody(response.body, ProgressResponseBody.ProgressListener { totalSize, downSize ->
-                    //借助rxandroid封装的
-                    AndroidSchedulers.mainThread().scheduleDirect {
-                        pL.onProgress(totalSize, downSize)
-                    }
-                })).build()
-            }
-        }
-        //如果没有下载拦截器 就加入日志
-        val retrofit: Retrofit
+        // add download progress listener
+        addDownloadProgressListener(progressListener, mBuilder)
         val serviceI: IApiService
-        retrofit = Retrofit.Builder()
-                .client(mBuilder.build())
-                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create())
-                .baseUrl(baseUrl)
-                .build()
-        serviceI = retrofit.create<IApiService>(IApiService::class.java)
+        val retrofit: Retrofit = Retrofit.Builder()
+            .client(mBuilder.build())
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+            .addConverterFactory(GsonConverterFactory.create())
+            .baseUrl(baseUrl)
+            .build()
+        serviceI = retrofit.create(IApiService::class.java)
         return serviceI
     }
 
-    private var defaultHeaderInterceptor = Interceptor { chain ->
+    private fun addDownloadProgressListener(
+        progressListener: ProgressResponseBody.ProgressListener?,
+        mBuilder: OkHttpClient.Builder
+    ) {
+        progressListener?.let { pL ->
+            mBuilder.addNetworkInterceptor { chain ->
+                val response = chain.proceed(chain.request())
+                val responseBody = response.body
+                val progressResponseBody: ProgressResponseBody? = if (responseBody != null) {
+                    ProgressResponseBody(responseBody,
+                        object : ProgressResponseBody.ProgressListener {
+                            override fun onProgress(totalSize: Long, downSize: Long) {
+                                GlobalScope.launch(Dispatchers.IO) {
+                                    withContext(Dispatchers.Main) {
+                                        pL.onProgress(totalSize, downSize)
+                                    }
+                                }
+                            }
+                        }
+                    )
+                } else {
+                    null
+                }
+                response.newBuilder().body(progressResponseBody).build()
+            }
+        }
+    }
 
-        // 以拦截到的请求为基础创建一个新的请求对象，然后插入Header
+    private var defaultHeaderInterceptor = Interceptor { chain ->
+        // create a new request based on the intercepted chain, then insert headers
         var builder = chain.request().newBuilder()
         builder = addHeaders(builder)
         val newRequest = builder.build()
-        // 开始请求
+        // then start request
         chain.proceed(newRequest)
     }
 
@@ -71,7 +91,5 @@ object ApiServiceHelper {
         }
         return builder
     }
-
-    var headers = HashMap<String, String>()
 
 }

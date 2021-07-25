@@ -10,75 +10,76 @@ import retrofit2.http.*
 /**
  * Created by Riggs on 12/18/2019
  */
+@Suppress("unused")
 interface IApiService {
 
     @GET("{path}")
-    fun get(@Path("path") path: String): Observable<Response<ResponseBody>>
+    suspend fun get(@Path("path") url: String): Response<ResponseBody>
 
     @GET("{path}")
-    fun getWithQueryMap(
-        @Path("path") path: String,
+    suspend fun getWithQueryMap(
+        @Path("path") url: String,
         @QueryMap params: Map<String, String>
-    ): Observable<Response<ResponseBody>>
+    ): Response<ResponseBody>
 
     @GET("{path}")
-    fun getWithHeaderMap(
-        @Path("path") path: String,
+    suspend fun getWithHeaderMap(
+        @Path("path") url: String,
         @HeaderMap header: Map<String, String>
-    ): Observable<Response<ResponseBody>>
+    ): Response<ResponseBody>
 
     @GET("{path}")
-    fun getWithQueryHeaderMaps(
-        @Path("path") path: String,
+    suspend fun getWithQueryHeaderMaps(
+        @Path("path") url: String,
         @QueryMap params: Map<String, String>,
         @HeaderMap header: Map<String, String>
-    ): Observable<Response<ResponseBody>>
+    ): Response<ResponseBody>
 
     @POST("{path}")
-    fun postWithBody(
-        @Path("path") path: String,
+    suspend fun postWithBody(
+        @Path("path") url: String,
         @Body body: RequestBody
-    ): Observable<Response<ResponseBody>>
+    ): Response<ResponseBody>
 
     @POST("{path}")
-    fun postWithBodyHeaderMaps(
-        @Path("path") path: String,
+    suspend fun postWithBodyHeaderMaps(
+        @Path("path") url: String,
         @Body body: RequestBody,
         @HeaderMap header: Map<String, String>
-    ): Observable<Response<ResponseBody>>
+    ): Response<ResponseBody>
 
     @FormUrlEncoded
     @POST("{path}")
-    fun postWithFieldMap(
-        @Path("path") path: String,
+    suspend fun postWithFieldMap(
+        @Path("path") url: String,
         @FieldMap fieldMap: Map<String, String>
-    ): Observable<Response<ResponseBody>>
+    ): Response<ResponseBody>
 
     @FormUrlEncoded
     @POST("{path}")
-    fun postWithFieldHeaderMaps(
-        @Path("path") path: String,
+    suspend fun postWithFieldHeaderMaps(
+        @Path("path") url: String,
         @FieldMap fieldMap: Map<String, String>,
         @HeaderMap header: Map<String, String>
-    ): Observable<Response<ResponseBody>>
+    ): Response<ResponseBody>
 
     @POST("{path}")
-    fun postWithHeaderMap(
-        @Path("path") path: String,
+    suspend fun postWithHeaderMap(
+        @Path("path") url: String,
         @HeaderMap header: Map<String, String>
-    ): Observable<Response<ResponseBody>>
+    ): Response<ResponseBody>
 
     @POST("{path}")
-    fun post(@Path("path") path: String): Observable<Response<ResponseBody>>
+    suspend fun post(@Path("path") url: String): Response<ResponseBody>
 
     @Multipart
     @POST
-    fun uploadFile(
+    suspend fun uploadFile(
         @Url url: String,
         @Part partList: List<MultipartBody.Part>
-    ): Observable<Response<ResponseBody>>
+    ): Response<ResponseBody>
 
     @Streaming
     @GET
-    fun downloadFile(@Url url: String): Observable<ResponseBody>
+    suspend fun downloadFile(@Url url: String): Response<ResponseBody>
 }

@@ -8,6 +8,7 @@ import java.net.URLEncoder
  */
 class UrlUtil {
     companion object {
+        @Suppress("unused")
         fun appendParams(baseUrl: String, url: String, params: Map<String, Any>?): String {
             if (params == null || params.isEmpty()) {
                 return url
@@ -23,8 +24,8 @@ class UrlUtil {
             }
             for ((key, value) in params) {
                 urlBuilder.append("&$key")
-                        .append("=")
-                        .append(encode(value.toString()))
+                    .append("=")
+                    .append(encode(value.toString()))
             }
             return urlBuilder.toString()
         }
@@ -40,7 +41,7 @@ class UrlUtil {
         }
 
         /**
-         * 分割URL为数组,第一位为baseUrl,第二位为剩余Url
+         * Split the whole URL into 2 piece, the first one will be baseUrl , the second one will be the rest url
          */
         fun splitUrl(url: String): Array<String> {
             val baseUrlBuilder = StringBuilder()
@@ -53,7 +54,8 @@ class UrlUtil {
                 baseUrlBuilder.append("https://")
                 replaced = url.replace("https://", "")
             }
-            val baseUrl = baseUrlBuilder.append(replaced.substring(0, replaced.indexOf("/"))).toString()
+            val baseUrl =
+                baseUrlBuilder.append(replaced.substring(0, replaced.indexOf("/"))).toString()
             val restUrl = replaced.substring(replaced.indexOf("/"))
             return arrayOf(baseUrl, restUrl)
         }
