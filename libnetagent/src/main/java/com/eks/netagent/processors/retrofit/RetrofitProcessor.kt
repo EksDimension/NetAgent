@@ -20,6 +20,7 @@ import okhttp3.ResponseBody
 import org.json.JSONObject
 import retrofit2.Response
 import java.io.File
+import java.lang.Exception
 
 /**
  * Created by Riggs on 2020/3/2
@@ -56,16 +57,20 @@ class RetrofitProcessor : INetProcessor {
         callback: ICallback
     ) {
         GlobalScope.launch(Dispatchers.Main) Scope@{
-            var baseUrl: String?
-            baseUrl = commonBaseUrl
-            if (designatedBaseUrl != null) {
-                baseUrl = designatedBaseUrl
+            try {
+                var baseUrl: String?
+                baseUrl = commonBaseUrl
+                if (designatedBaseUrl != null) {
+                    baseUrl = designatedBaseUrl
+                }
+                if (baseUrl == null || baseUrl.isEmpty()) return@Scope
+                val response: Response<ResponseBody> =
+                    processRequest(requestType, params, headers, baseUrl, url)
+                val responseString = processRequestResponse(response)
+                callback.onSucceed(responseString)
+            } catch (e: Exception) {
+                callback.onFailed(e)
             }
-            if (baseUrl == null || baseUrl.isEmpty()) return@Scope
-            val response: Response<ResponseBody> =
-                processRequest(requestType, params, headers, baseUrl, url)
-            val responseString = processRequestResponse(response)
-            callback.onSucceed(responseString)
         }
     }
 
@@ -130,16 +135,20 @@ class RetrofitProcessor : INetProcessor {
         downloadListener: DownloadListener?
     ) {
         GlobalScope.launch(Dispatchers.Main) Scope@{
-            val splitUrlArr = UrlUtil.splitUrl(url)
-            val response: Response<ResponseBody> = withContext(Dispatchers.IO) {
-                ApiService(splitUrlArr[0], downloadListener?.let {
-                    ProgressResponseBody.ProgressListener { totalSize, downSize ->
-                        downloadListener.onProgress(totalSize, downSize)
-                    }
-                }).iApiService.downloadFile(splitUrlArr[1])
+            try {
+                val splitUrlArr = UrlUtil.splitUrl(url)
+                val response: Response<ResponseBody> = withContext(Dispatchers.IO) {
+                    ApiService(splitUrlArr[0], downloadListener?.let {
+                        ProgressResponseBody.ProgressListener { totalSize, downSize ->
+                            downloadListener.onProgress(totalSize, downSize)
+                        }
+                    }).iApiService.downloadFile(splitUrlArr[1])
+                }
+                val responseString = processDownloadResponse(response, savePath)
+                callback.onSucceed(responseString)
+            } catch (e: Exception) {
+                callback.onFailed(e)
             }
-            val responseString = processDownloadResponse(response, savePath)
-            callback.onSucceed(responseString)
         }
     }
 
