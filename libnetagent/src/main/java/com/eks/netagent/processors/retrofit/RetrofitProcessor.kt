@@ -147,7 +147,11 @@ class RetrofitProcessor : INetProcessor {
                     }).iApiService.downloadFile(splitUrlArr[1])
                 }
                 val responseString = processDownloadResponse(response, savePath)
-                callback.onSucceed(responseString)
+                if (responseString.isEmpty() || responseString.isBlank()) {
+                    throw IllegalAccessError()
+                } else {
+                    callback.onSucceed(responseString)
+                }
             } catch (e: Exception) {
                 callback.onFailed(e)
             }
@@ -159,9 +163,13 @@ class RetrofitProcessor : INetProcessor {
         savePath: String
     ): String {
         return withContext(Dispatchers.IO) {
-            val it = response.body()
-            val file = FileUtil.saveFile(savePath, it)
-            file.path
+            val responseBody = response.body()
+            if (responseBody != null) {
+                val file = FileUtil.saveFile(savePath, responseBody)
+                file?.path ?: ""
+            } else {
+                ""
+            }
         }
     }
 

@@ -1,71 +1,56 @@
-package com.eks.netagent.utils;
+package com.eks.netagent.utils
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
-import okhttp3.ResponseBody;
+import okhttp3.ResponseBody
+import java.io.*
 
 /**
  * Created by Riggs on 12/19/2019
  */
-public class FileUtil {
-    public static File saveFile(String filePath, ResponseBody body) {
-        InputStream inputStream = null;
-        OutputStream outputStream = null;
-        File file = null;
+object FileUtil {
+    fun saveFile(filePath: String?, body: ResponseBody): File? {
+        var inputStream: InputStream? = null
+        var outputStream: OutputStream? = null
+        var file: File? = null
         try {
             if (filePath == null) {
-                return null;
+                return null
             }
-            file = new File(filePath);
+            file = File(filePath)
             if (!file.exists()) {
-                file.createNewFile();
+                file.createNewFile()
             }
-
-
-            long fileSize = body.contentLength();
-            long fileSizeDownloaded = 0;
-            byte[] fileReader = new byte[4096];
-
-            inputStream = body.byteStream();
-            outputStream = new FileOutputStream(file);
-
+            body.contentLength()
+            var fileSizeDownloaded: Long = 0
+            val fileReader = ByteArray(4096)
+            inputStream = body.byteStream()
+            outputStream = FileOutputStream(file)
             while (true) {
-                int read = inputStream.read(fileReader);
+                val read = inputStream.read(fileReader)
                 if (read == -1) {
-                    break;
+                    break
                 }
-                outputStream.write(fileReader, 0, read);
-                fileSizeDownloaded += read;
-
+                outputStream.write(fileReader, 0, read)
+                fileSizeDownloaded += read.toLong()
             }
-
-            outputStream.flush();
-
-
-        } catch (Exception e) {
-            e.printStackTrace();
+            outputStream.flush()
+        } catch (e: Exception) {
+            e.printStackTrace()
         } finally {
             if (inputStream != null) {
                 try {
-                    inputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    inputStream.close()
+                } catch (e: IOException) {
+                    e.printStackTrace()
                 }
             }
-
             if (outputStream != null) {
                 try {
-                    outputStream.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    outputStream.close()
+                } catch (e: IOException) {
+                    e.printStackTrace()
                 }
             }
         }
-
-        return file;
+        return file
     }
 }
