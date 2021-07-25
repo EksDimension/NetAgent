@@ -14,7 +14,7 @@ import okio.BufferedSink;
 /**
  * Created by Riggs on 2020/3/5
  */
-public class DownloadProgressRequestBody extends RequestBody {
+public class UploadProgressRequestBody extends RequestBody {
     private File mFile;
     private String mPath;
     private String mMediaType;
@@ -22,13 +22,13 @@ public class DownloadProgressRequestBody extends RequestBody {
 
     private int mEachBufferSize = 1024;
 
-    public DownloadProgressRequestBody(final File file, String mediaType, final UploadCallbacks listener) {
+    public UploadProgressRequestBody(final File file, String mediaType, final UploadCallbacks listener) {
         mFile = file;
         mMediaType = mediaType;
         mListener = listener;
     }
 
-    public DownloadProgressRequestBody(final File file, String mediaType, int eachBufferSize, final UploadCallbacks listener) {
+    public UploadProgressRequestBody(final File file, String mediaType, int eachBufferSize, final UploadCallbacks listener) {
         mFile = file;
         mMediaType = mediaType;
         mEachBufferSize = eachBufferSize;

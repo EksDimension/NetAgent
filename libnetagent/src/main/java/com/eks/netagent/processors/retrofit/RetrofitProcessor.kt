@@ -3,7 +3,7 @@ package com.eks.netagent.processors.retrofit
 import com.eks.netagent.core.*
 import com.eks.netagent.processors.retrofit.http.ApiService
 import com.eks.netagent.processors.retrofit.http.ApiServiceHelper
-import com.eks.netagent.processors.retrofit.responsebody.DownloadProgressRequestBody
+import com.eks.netagent.processors.retrofit.responsebody.UploadProgressRequestBody
 import com.eks.netagent.processors.retrofit.responsebody.ProgressResponseBody
 import com.eks.netagent.utils.FileUtil
 import com.eks.netagent.utils.UrlUtil
@@ -182,11 +182,12 @@ class RetrofitProcessor : INetProcessor {
     ) {
         val builder = MultipartBody.Builder().setType(MultipartBody.FORM)
         for (uploadFileEntry in uploadFileMap.entries) {
-            val fileBody = DownloadProgressRequestBody(
-                uploadFileEntry.value, "multipart/form-data"
-            ) { totalSize, uploadedSize ->
-                uploadListener?.onProgress(totalSize, uploadedSize)
-            }
+            val fileBody =
+                UploadProgressRequestBody(
+                    uploadFileEntry.value, "multipart/form-data"
+                ) { totalSize, uploadedSize ->
+                    uploadListener?.onProgress(totalSize, uploadedSize)
+                }
             builder.addFormDataPart(uploadFileEntry.key, uploadFileEntry.value.name, fileBody)
             for (paramsEntry in params.entries) {
                 builder.addFormDataPart(paramsEntry.key, paramsEntry.value)
